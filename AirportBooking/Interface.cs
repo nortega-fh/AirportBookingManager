@@ -2,20 +2,103 @@
 
 namespace AirportBooking
 {
-    public class Interface
+    public class Interface(UserView userView, FlightsView flightView, BookingRepository repository)
     {
-        public User? CurrentUser { get; set; }
+        private User? CurrentUser { get; set; }
+        private readonly FlightsView flightView = flightView;
+        private readonly UserView userView = userView;
+        private readonly BookingRepository repository = repository;
 
-        private readonly UserRepository userFileRepository;
-
-        public Interface()
+        private Booking? CreateBooking()
         {
-            userFileRepository = new();
+            if (CurrentUser is null) return null;
+
+            Console.WriteLine("""
+                - ############################################## -
+                
+                                  Create Booking
+                
+                - ############################################## -
+                
+                Select the type of booking you want to create:
+                1. One way
+                2. Round trip
+                3. Go back
+                """);
+            string answer = Console.ReadLine() ?? "";
+            while (answer.Equals(""))
+            {
+                Console.WriteLine("Invalid input, please try again");
+                answer = Console.ReadLine() ?? "";
+            }
+            if (answer is "3") return null;
+            BookingType bookingType = answer switch
+            {
+                "1" => BookingType.OneWay,
+                _ => BookingType.RoundTrip
+            };
+            var flightParameters = flightView.ObtainFlightFilters(bookingType);
+            flightView.ShowFlights(flightParameters);
+
+            var bookedFlights = new List<Flight>();
+            var flightClasses = new List<FlightClass>();
+            var totalPrice = 0f;
+
+            Console.WriteLine("From the previous list, please select the departure flight by writing the flight number:");
+            Flight? departureFlight = flightView.ShowFlight(Console.ReadLine() ?? "");
+            while (departureFlight is null)
+            {
+                Console.WriteLine("Invalid input, please try again");
+                departureFlight = flightView.ShowFlight(Console.ReadLine() ?? "");
+            }
+
+            bookedFlights.Add(departureFlight);
+            FlightClass departureClass = flightView.ChooseFlightPrice(departureFlight);
+            flightClasses.Add(departureClass);
+            totalPrice += departureFlight.Prices[departureClass];
+
+            if (bookingType is BookingType.RoundTrip && flightParameters.ReturnDate is not null)
+            {
+                var returnParameters = flightParameters with { OriginCountry = flightParameters.DestinationCountry, DestinationCountry = flightParameters.OriginCountry, DepartureDate = flightParameters.ReturnDate.Value };
+
+                flightView.ShowFlights(returnParameters);
+
+                Console.WriteLine("From the previous list, please select the return flight by writing the flight number:");
+                Flight? returnFlight = flightView.ShowFlight(Console.ReadLine() ?? "");
+                while (returnFlight is null)
+                {
+                    Console.WriteLine("Invalid input, please try again");
+                    returnFlight = flightView.ShowFlight(Console.ReadLine() ?? "");
+                }
+
+                bookedFlights.Add(returnFlight);
+                FlightClass returnClass = flightView.ChooseFlightPrice(returnFlight);
+                flightClasses.Add(returnClass);
+                totalPrice += returnFlight.Prices[returnClass];
+            }
+
+            var obtainedBooking = new BookingDTO(bookedFlights, flightClasses, bookingType, CurrentUser, totalPrice);
+
+            Console.WriteLine($"""
+                Summary of your booking:
+
+                {obtainedBooking}
+
+                Do you wish to proceed with this booking?
+                1. Yes
+                2. Cancel
+                """);
+
+            if (Console.ReadLine() is not "1") return null;
+
+            Console.Clear();
+
+            return repository.Save(obtainedBooking);
         }
 
-        private void ShowPassengerMenu()
+        public void ShowPassengerMenu()
         {
-            while (true)
+            while (CurrentUser is not null)
             {
                 Console.WriteLine("""
                     - ############################################## -
@@ -31,9 +114,11 @@ namespace AirportBooking
                     """);
 
                 string? option = Console.ReadLine();
+                Console.Clear();
                 switch (option)
                 {
                     case "1":
+                        CreateBooking();
                         break;
                     case "2":
                         break;
@@ -41,15 +126,15 @@ namespace AirportBooking
                         break;
                     case "4":
                         CurrentUser = null;
-                        return;
+                        break;
                 }
-                Console.Clear();
             }
+            ShowMainMenu();
         }
 
-        private void ShowManagerMenu()
+        public void ShowManagerMenu()
         {
-            while (true)
+            while (CurrentUser is not null)
             {
                 Console.WriteLine("""
                     - ############################################## -
@@ -75,83 +160,15 @@ namespace AirportBooking
                         break;
                     case "4":
                         CurrentUser = null;
-                        return;
+                        break;
                 }
                 Console.Clear();
             }
+            ShowMainMenu();
         }
-
-        private void ShowLoginMenu()
-        {
-            while (CurrentUser is null)
-            {
-                Console.WriteLine("""
-                    - ############################################## -
-                    
-                                        Login
-
-                    - ############################################## -
-                    """);
-                Console.WriteLine("Please write your username:");
-                string? username = Console.ReadLine();
-
-                Console.WriteLine("Please write your password:");
-                string? password = Console.ReadLine();
-
-                try
-                {
-                    CurrentUser = userFileRepository.Login(username ?? "", password ?? "");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Could not login: {ex.Message}");
-                }
-            }
-            Console.Clear();
-            switch (CurrentUser.Role)
-            {
-                case UserRole.Manager:
-                    ShowManagerMenu();
-                    break;
-                case UserRole.Passenger:
-                    ShowPassengerMenu();
-                    break;
-            }
-        }
-
-        private void ShowRegisterMenu()
-        {
-            while (CurrentUser is null)
-            {
-                Console.WriteLine("""
-                    - ############################################## -
-                    
-                                        Register
-
-                    - ############################################## -
-                    """);
-                Console.WriteLine("Please write your username:");
-                string? username = Console.ReadLine();
-
-                Console.WriteLine("Please write your password:");
-                string? password = Console.ReadLine();
-
-                try
-                {
-                    CurrentUser = userFileRepository.Save(new User(username ?? "", password ?? "", UserRole.Passenger.ToString()));
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                }
-            }
-            Console.Clear();
-            ShowPassengerMenu();
-        }
-
         public void ShowMainMenu()
         {
-            while (true)
+            while (CurrentUser is null)
             {
                 Console.WriteLine("""
                 - ############################################## -
@@ -170,10 +187,10 @@ namespace AirportBooking
                 switch (answer)
                 {
                     case "1":
-                        ShowLoginMenu();
+                        CurrentUser = userView.ShowLoginMenu();
                         break;
                     case "2":
-                        ShowRegisterMenu();
+                        CurrentUser = userView.ShowRegisterMenu();
                         break;
                     case "3":
                         return;
@@ -182,7 +199,15 @@ namespace AirportBooking
                         Console.ReadLine();
                         break;
                 };
-                Console.Clear();
+            }
+            switch (CurrentUser.Role)
+            {
+                case UserRole.Manager:
+                    ShowManagerMenu();
+                    break;
+                case UserRole.Passenger:
+                    ShowPassengerMenu();
+                    break;
             }
         }
     }

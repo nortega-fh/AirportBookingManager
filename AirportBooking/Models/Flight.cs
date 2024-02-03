@@ -27,11 +27,6 @@ namespace AirportBooking
         }
         public override string ToString() => $"""
             {Number} / {OriginCountry} ({OriginAirport}) - {DestinationCountry} ({DestinationAirport}) / {DepartureDate} - {ArrivalDate}
-            ---------------
-                Prices
-            ---------------
-            {PricesToString()}
-            ---------------
             """;
     }
 }

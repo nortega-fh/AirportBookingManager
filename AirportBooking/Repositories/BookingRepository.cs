@@ -90,11 +90,27 @@ namespace AirportBooking
             reservationNumber++;
 
             csvReader.WriteEntityInformation(booking.ToCSV());
+
             csvReader.WriteRelationshipInformation(booking.ReservationNumber.ToString(), booking.Flights.Select(f => f.Number).ToList());
 
             bookings.Add(booking);
 
             return booking;
+        }
+
+        public Booking Save(BookingDTO booking)
+        {
+            var createdBooking = new Booking(reservationNumber, booking.Flights, booking.FlightClasses, booking.Type, booking.Passenger, booking.TotalPrice);
+
+            reservationNumber++;
+
+            csvReader.WriteEntityInformation(createdBooking.ToCSV());
+
+            csvReader.WriteRelationshipInformation(createdBooking.ReservationNumber.ToString(), booking.Flights.Select(f => f.Number).ToList());
+
+            bookings.Add(createdBooking);
+
+            return createdBooking;
         }
 
         public Booking Update(int reservationNumber, Booking booking)
