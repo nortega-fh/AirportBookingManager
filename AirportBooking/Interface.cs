@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AirportBooking.Enums;
 
 namespace AirportBooking
 {
@@ -12,7 +8,7 @@ namespace AirportBooking
 
         private readonly UserRepository userFileRepository;
 
-        public Interface() 
+        public Interface()
         {
             userFileRepository = new();
         }
@@ -84,10 +80,10 @@ namespace AirportBooking
                 Console.Clear();
             }
         }
-        
+
         private void ShowLoginMenu()
         {
-            while(CurrentUser is null)
+            while (CurrentUser is null)
             {
                 Console.WriteLine("""
                     - ############################################## -
@@ -106,7 +102,7 @@ namespace AirportBooking
                 {
                     CurrentUser = userFileRepository.Login(username ?? "", password ?? "");
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Console.WriteLine($"Could not login: {ex.Message}");
                 }
@@ -117,15 +113,15 @@ namespace AirportBooking
                 case UserRole.Manager:
                     ShowManagerMenu();
                     break;
-                case UserRole.Passenger: 
-                    ShowPassengerMenu(); 
+                case UserRole.Passenger:
+                    ShowPassengerMenu();
                     break;
             }
         }
 
         private void ShowRegisterMenu()
         {
-            while(CurrentUser is null)
+            while (CurrentUser is null)
             {
                 Console.WriteLine("""
                     - ############################################## -

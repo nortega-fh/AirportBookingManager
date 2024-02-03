@@ -92,6 +92,8 @@ namespace AirportBooking
             csvReader.WriteEntityInformation(booking.ToCSV());
             csvReader.WriteRelationshipInformation(booking.ReservationNumber.ToString(), booking.Flights.Select(f => f.Number).ToList());
 
+            bookings.Add(booking);
+
             return booking;
         }
 

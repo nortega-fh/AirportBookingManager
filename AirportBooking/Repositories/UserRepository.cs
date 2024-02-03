@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AirportBooking.Lib;
+﻿using AirportBooking.Lib;
 
 namespace AirportBooking
 {
-    internal class UserRepository : IFileRepository<string, User> 
+    public class UserRepository : IFileRepository<string, User>
     {
         private readonly List<User> userList = [];
 
@@ -28,7 +23,7 @@ namespace AirportBooking
 
         private void LoadUsers()
         {
-            List<string> readUsers = userCSVReader.ReadEntityCSV().ToList();
+            List<string> readUsers = userCSVReader.ReadEntityInformation().ToList();
             readUsers.ForEach(AddUserFromCSVLine);
         }
 
@@ -45,11 +40,7 @@ namespace AirportBooking
         public User Login(string username, string password)
         {
             User? user = userList.Find(user => user.Username.Equals(username, StringComparison.OrdinalIgnoreCase) && user.Password.Equals(password, StringComparison.OrdinalIgnoreCase));
-            if(user is null)
-            {
-                throw new EntityNotFound<User, string>(username);
-            }
-            return user;
+            return user is null ? throw new EntityNotFound<User, string>(username) : user;
         }
 
         public User Save(User user)
@@ -59,7 +50,7 @@ namespace AirportBooking
             {
                 throw new EntityAlreadyExists<User, string>(user.Username);
             }
-            userCSVReader.WriteEntity(user.ToCSV());
+            userCSVReader.WriteEntityInformation(user.ToCSV());
             return user;
         }
 

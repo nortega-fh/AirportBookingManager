@@ -122,6 +122,7 @@ namespace AirportBooking
                 throw new EntityAlreadyExists<Flight, string>(flight.Number);
             }
             flightCSVReader.WriteEntityInformation(flight.ToCSV());
+            flights.Add(flight);
             return flight;
         }
 
