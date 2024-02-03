@@ -1,0 +1,2 @@
+ReservationNumber,TotalPrice,BookingType,FirstFlightClass,SecondFlightClass,Passenger
+1,250,RoundTrip,Economy,Business,passenger

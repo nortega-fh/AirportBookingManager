@@ -7,4 +7,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Data\flights\" />
+    <Folder Include="Data\bookings\" />
+  </ItemGroup>
+
 </Project>
