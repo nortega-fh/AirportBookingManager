@@ -96,6 +96,45 @@ namespace AirportBooking
             return repository.Save(obtainedBooking);
         }
 
+        private void SearchAvailableFlights()
+        {
+            Console.WriteLine("""
+                - ############################################## -
+                
+                                Flight searcher
+                
+                - ############################################## -
+                """);
+
+            Console.WriteLine("""
+                Do you wish to search for a return fligth?
+                1. Yes
+                2. No
+                """);
+
+            var bookingType = Console.ReadLine() is not "1" ? BookingType.OneWay : BookingType.RoundTrip;
+
+            var searchParameters = flightView.ObtainFlightFilters(bookingType);
+
+            Console.WriteLine("Available departure flights:");
+            flightView.ShowFlights(searchParameters);
+            Console.ReadLine();
+            Console.Clear();
+
+            if (bookingType is BookingType.RoundTrip && searchParameters.ReturnDate is not null)
+            {
+                Console.WriteLine("Available return flights:");
+                flightView.ShowFlights(searchParameters with
+                {
+                    OriginCountry = searchParameters.DestinationCountry,
+                    DestinationCountry = searchParameters.OriginCountry,
+                    DepartureDate = searchParameters.ReturnDate.Value
+                });
+                Console.ReadLine();
+                Console.Clear();
+            }
+        }
+
         public void ShowPassengerMenu()
         {
             while (CurrentUser is not null)
@@ -121,6 +160,7 @@ namespace AirportBooking
                         CreateBooking();
                         break;
                     case "2":
+                        SearchAvailableFlights();
                         break;
                     case "3":
                         break;

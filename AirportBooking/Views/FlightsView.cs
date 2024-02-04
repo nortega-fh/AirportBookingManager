@@ -120,6 +120,7 @@ namespace AirportBooking
 
         public List<Flight> ShowFlights(FlightParameters? parameters = null)
         {
+            Console.Clear();
             var flights = parameters is null ? repository.FindAll().ToList() : repository.FindBySearchParameters(parameters).ToList();
             flights.ForEach(Console.WriteLine);
             return flights;
