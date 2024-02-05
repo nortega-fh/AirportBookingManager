@@ -7,7 +7,7 @@ namespace AirportBooking
     public class BookingRepository : IFileRepository<int, Booking>
     {
         private static int reservationNumber = 1;
-        private readonly List<Booking> bookings = [];
+        private List<Booking> bookings = [];
         private readonly UserRepository userRepository;
         private readonly FlightRepository flightRepository;
         private readonly CSVReader csvReader = new("bookings", "flights");
@@ -113,14 +113,25 @@ namespace AirportBooking
             return createdBooking;
         }
 
-        public Booking Update(int reservationNumber, Booking booking)
+        public Booking? Update(int reservationNumber, Booking booking)
         {
-            throw new NotImplementedException();
+            if (bookings.Find(b => b.ReservationNumber == reservationNumber) == null)
+            {
+                throw new EntityNotFound<Booking, int>(reservationNumber);
+            }
+            csvReader.UpdateEntityInformation(reservationNumber.ToString(), booking.ToCSV());
+            bookings = bookings.Select(b => b.ReservationNumber == reservationNumber ? booking : b).ToList();
+            return booking;
         }
 
         public void Delete(int reservationNumber)
         {
-            throw new NotImplementedException();
+            if (bookings.Find(b => b.ReservationNumber == reservationNumber) == null)
+            {
+                throw new EntityNotFound<Booking, int>(reservationNumber);
+            }
+            csvReader.DeleteEntityInformation(reservationNumber.ToString(), true);
+            bookings = bookings.Where(b => b.ReservationNumber != reservationNumber).ToList();
         }
     }
 }

@@ -6,7 +6,7 @@ namespace AirportBooking
 {
     public class FlightRepository : IFileRepository<string, Flight>
     {
-        private readonly List<Flight> flights = [];
+        private List<Flight> flights = [];
         private readonly CSVReader flightCSVReader = new("flights");
 
         public FlightRepository()
@@ -126,14 +126,25 @@ namespace AirportBooking
             return flight;
         }
 
-        public Flight Update(string flightNumber, Flight newFlight)
+        public Flight? Update(string flightNumber, Flight newFlight)
         {
-            throw new NotImplementedException();
+            if (flights.Find(f => f.Number.Equals(flightNumber, StringComparison.OrdinalIgnoreCase)) is null)
+            {
+                throw new EntityNotFound<Flight, string>(flightNumber);
+            }
+            flightCSVReader.UpdateEntityInformation(flightNumber, newFlight.ToCSV());
+            flights = flights.Select(f => f.Number.Equals(flightNumber,
+                StringComparison.OrdinalIgnoreCase) ? newFlight : f).ToList();
+            return newFlight;
         }
 
         public void Delete(string flightNumber)
         {
-            throw new NotImplementedException();
+            if (flights.Find(f => f.Number.Equals(flightNumber, StringComparison.OrdinalIgnoreCase)) is null)
+            {
+                throw new EntityNotFound<Flight, string>(flightNumber);
+            }
+            flights = flights.Where(f => !f.Number.Equals(flightNumber, StringComparison.OrdinalIgnoreCase)).ToList();
         }
     }
 }
