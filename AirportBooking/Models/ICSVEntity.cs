@@ -1,7 +1,6 @@
-﻿namespace AirportBooking
+﻿namespace AirportBooking;
+
+public interface ICSVEntity
 {
-    public interface ICSVEntity
-    {
-        public string ToCSV();
-    }
+    public string ToCSV();
 }

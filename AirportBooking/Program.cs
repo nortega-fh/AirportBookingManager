@@ -1,4 +1,6 @@
 ﻿using AirportBooking;
+using AirportBooking.Repositories;
+using AirportBooking.Views;
 
 var userRepository = new UserRepository();
 var flightRepository = new FlightRepository();

@@ -1,71 +1,72 @@
 ﻿using AirportBooking.Enums;
+using AirportBooking.Models;
+using AirportBooking.Repositories;
 
-namespace AirportBooking
+namespace AirportBooking.Views;
+
+public class UserView(UserRepository userRepository)
 {
-    public class UserView(UserRepository userRepository)
+    private readonly UserRepository userRepository = userRepository;
+
+    public User? ShowLoginMenu()
     {
-        private readonly UserRepository userRepository = userRepository;
-
-        public User? ShowLoginMenu()
+        User? foundUser = null;
+        while (foundUser is null)
         {
-            User? foundUser = null;
-            while (foundUser is null)
+            Console.WriteLine("""
+                - ############################################## -
+                
+                                    Login
+
+                - ############################################## -
+                """);
+            Console.WriteLine("Please write your username:");
+            string? username = Console.ReadLine();
+
+            Console.WriteLine("Please write your password:");
+            string? password = Console.ReadLine();
+
+            try
             {
-                Console.WriteLine("""
-                    - ############################################## -
-                    
-                                        Login
-
-                    - ############################################## -
-                    """);
-                Console.WriteLine("Please write your username:");
-                string? username = Console.ReadLine();
-
-                Console.WriteLine("Please write your password:");
-                string? password = Console.ReadLine();
-
-                try
-                {
-                    foundUser = userRepository.Login(username ?? "", password ?? "");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Could not login: {ex.Message}");
-                }
+                foundUser = userRepository.Login(username ?? "", password ?? "");
             }
-            Console.Clear();
-            return foundUser;
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Could not login: {ex.Message}");
+            }
         }
+        Console.Clear();
+        return foundUser;
+    }
 
-        public User? ShowRegisterMenu()
+    public User? ShowRegisterMenu()
+    {
+        User? foundUser = null;
+        while (foundUser is null)
         {
-            User? foundUser = null;
-            while (foundUser is null)
+            Console.WriteLine("""
+                - ############################################## -
+                
+                                    Register
+
+                - ############################################## -
+                """);
+            Console.WriteLine("Please write your username:");
+            string? username = Console.ReadLine();
+
+            Console.WriteLine("Please write your password:");
+            string? password = Console.ReadLine();
+
+            try
             {
-                Console.WriteLine("""
-                    - ############################################## -
-                    
-                                        Register
-
-                    - ############################################## -
-                    """);
-                Console.WriteLine("Please write your username:");
-                string? username = Console.ReadLine();
-
-                Console.WriteLine("Please write your password:");
-                string? password = Console.ReadLine();
-
-                try
-                {
-                    foundUser = userRepository.Save(new User(username ?? "", password ?? "", UserRole.Passenger.ToString()));
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                }
+                foundUser = userRepository.Save(new User(username ?? "", password ?? "", UserRole.Passenger.ToString()));
             }
-            Console.Clear();
-            return foundUser;
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
+        Console.Clear();
+        return foundUser;
     }
 }

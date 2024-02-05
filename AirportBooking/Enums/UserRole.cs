@@ -1,8 +1,7 @@
-﻿namespace AirportBooking.Enums
+﻿namespace AirportBooking.Enums;
+
+public enum UserRole
 {
-    public enum UserRole
-    {
-        Manager,
-        Passenger
-    }
+    Manager,
+    Passenger
 }
