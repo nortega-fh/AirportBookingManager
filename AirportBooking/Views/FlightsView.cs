@@ -7,7 +7,7 @@ namespace AirportBooking
     {
         private readonly FlightRepository repository = repository;
 
-        public FlightParameters ObtainFlightFilters(BookingType bookingType = BookingType.OneWay)
+        public FlightParameters GetFlightFilters(BookingType bookingType = BookingType.OneWay)
         {
             Console.WriteLine("Please write the country of origin:");
             string originCountry = Console.ReadLine() ?? "";
@@ -92,8 +92,10 @@ namespace AirportBooking
             return new FlightParameters(originCountry, destinationCountry, departureDate, returnDate, departureAirport, arrivalAirport, flightClass, minPrice, maxPrice);
         }
 
-        public Flight? ShowFlight(string flightNumber)
+        public Flight? GetFlight()
         {
+            Console.WriteLine("Please type the flight number:");
+            string flightNumber = Console.ReadLine() ?? "";
             if (flightNumber is "") return null;
             Flight? flight = repository.Find(flightNumber);
             Console.WriteLine(flight is not null ? flight : $"Flight with number {flightNumber} not found");
@@ -118,12 +120,11 @@ namespace AirportBooking
             };
         }
 
-        public List<Flight> ShowFlights(FlightParameters? parameters = null)
+        public void ShowFlights(FlightParameters? parameters = null)
         {
             Console.Clear();
             var flights = parameters is null ? repository.FindAll().ToList() : repository.FindBySearchParameters(parameters).ToList();
             flights.ForEach(Console.WriteLine);
-            return flights;
         }
     }
 }

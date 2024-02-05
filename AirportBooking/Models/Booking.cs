@@ -30,6 +30,16 @@ namespace AirportBooking
             MainPassenger = passenger;
         }
 
+        public void UpdatePrice()
+        {
+            Price = 0f;
+            for (var i = 0; i < Flights.Count; i++)
+            {
+                Price += Flights[i].Prices[FlightClasses[i]];
+            }
+
+        }
+
         public string ToCSV() => string.Join(",", [ReservationNumber, Price, BookingType, FlightClasses.First(), FlightClasses.Last(), MainPassenger.Username]);
 
         public string BookingFlightsToString()
@@ -44,13 +54,15 @@ namespace AirportBooking
         public override string ToString()
         {
             return $"""
-                Booking Summary:
-                    Flights:
-                        {BookingFlightsToString()}
-                    Booking type: {BookingType}
-                    Class: {FlightClassesToString()}
-                    Passenger:
-                        {MainPassenger}
+                ######################################
+                         Booking {ReservationNumber}
+                ######################################
+                Flights:
+                {BookingFlightsToString()}
+                Booking type: {BookingType}
+                Class: {FlightClassesToString()}
+                Passenger:
+                {MainPassenger}
                 --------------------------------------
                     Total price: ${Price}
                 --------------------------------------
