@@ -1,8 +1,8 @@
 ﻿using AirportBooking.Enums;
 
-namespace AirportBooking
+namespace AirportBooking.Views
 {
-    public class Interface(UserView userView, FlightsView flightView, BookingRepository repository)
+    public class MainView(UserView userView, FlightsView flightView, BookingRepository repository)
     {
         private User? CurrentUser { get; set; }
         private readonly FlightsView flightView = flightView;

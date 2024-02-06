@@ -35,7 +35,7 @@ namespace AirportBooking.Lib
         {
             try
             {
-                using StreamWriter writer = new(filePath, true);
+                using var writer = new StreamWriter(filePath, true);
                 writer.WriteLine(line);
             }
             catch (Exception e) when (e is IOException or DirectoryNotFoundException)
@@ -49,7 +49,8 @@ namespace AirportBooking.Lib
         {
             try
             {
-                string[] lines = File.ReadAllLines(filePath);
+                var lines = File.ReadAllLines(filePath);
+                
                 for (var i = 0; i < lines.Length; i++)
                 {
                     var data = lines[i].Split(",");
@@ -93,7 +94,7 @@ namespace AirportBooking.Lib
 
         public Dictionary<string, List<string>> GetRelationshipInformation()
         {
-            Dictionary<string, List<string>> mappedRelationship = [];
+            var mappedRelationship = new Dictionary<string, List<string>> { };
             try
             {
                 using var reader = File.OpenText(relationshipFilePath);
@@ -104,9 +105,7 @@ namespace AirportBooking.Lib
                 {
                     var data = line.Split(",");
                     line = reader.ReadLine();
-
                     (string pk, string fk) = (data[0], data[1]);
-
                     if (mappedRelationship.TryGetValue(pk, out List<string>? value))
                     {
                         value.Add(fk);
@@ -127,7 +126,7 @@ namespace AirportBooking.Lib
         {
             try
             {
-                using StreamWriter writer = new(relationshipFilePath, true);
+                using var writer = new StreamWriter(relationshipFilePath, true);
                 fks.ForEach(fk => writer.WriteLine(string.Join(",", [pk, fk])));
             }
             catch (Exception e) when (e is IOException or DirectoryNotFoundException)
