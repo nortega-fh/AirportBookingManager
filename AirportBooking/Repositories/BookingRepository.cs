@@ -30,30 +30,24 @@ namespace AirportBooking
         {
             var data = line.Split(",");
             if (data.Length < 6) throw new ArgumentException($"Error in booking line {line}: the data is incomplete");
-
-            List<FlightClass> flightClasses = [];
-
             try
             {
-                (int reservationNumber, float price, BookingType bookingType, FlightClass flightClass1, FlightClass flightClass2, string username) = (int.Parse(data[0]), float.Parse(data[1]), Enum.Parse<BookingType>(data[2]), Enum.Parse<FlightClass>(data[3]), Enum.Parse<FlightClass>(data[4]), data[5]);
-
-                flightClasses.Add(flightClass1);
-
+                (int reservationNumber, float price, BookingType bookingType, FlightClass flightClass1, 
+                    FlightClass flightClass2, string username) = (int.Parse(data[0]), float.Parse(data[1]), 
+                    Enum.Parse<BookingType>(data[2]), Enum.Parse<FlightClass>(data[3]), 
+                    Enum.Parse<FlightClass>(data[4]), data[5]);
+                var flightClasses = new List<FlightClass> { flightClass1 };
                 if (!flightClass2.Equals(flightClass1)) flightClasses.Add(flightClass2);
-
-                User user = userRepository.Find(username) ?? throw new InvalidAttributeException<string>(username, ["Required", $"{username} is not an existing User's username"]);
-
-                List<string>? bookingFlightNumbers = csvReader.GetRelationshipInformation().GetValueOrDefault(data[0]);
-
-                List<Flight> flights = [];
-
+                var user = userRepository.Find(username) ?? throw new InvalidAttributeException<string>(username, 
+                    ["Required", $"{username} is not an existing User's username"]);
+                var bookingFlightNumbers = csvReader.GetRelationshipInformation().GetValueOrDefault(data[0]);
+                var flights = new List<Flight> { };
                 bookingFlightNumbers?.ForEach(flightNumber => flights.Add(flightRepository.Find(flightNumber)
-                    ?? throw new InvalidAttributeException<string>(flightNumber, ["Required", $"{flightNumber} is not an existing Flight's number"])));
-
-                if (flights.Count == 0) throw new InvalidAttributeException<List<Flight>>(flights, ["Required", "There must be at least 1 flight for each booking"]);
-
-                Booking booking = new(reservationNumber, flights, flightClasses, bookingType, user, price);
-
+                    ?? throw new InvalidAttributeException<string>(flightNumber, 
+                    ["Required", $"{flightNumber} is not an existing Flight's number"])));
+                if (flights.Count == 0) throw new InvalidAttributeException<List<Flight>>(flights, 
+                    ["Required", "There must be at least 1 flight for each booking"]);
+                var booking = new Booking(reservationNumber, flights, flightClasses, bookingType, user, price);
                 return booking;
             }
             catch (FormatException)
@@ -88,34 +82,27 @@ namespace AirportBooking
                 throw new EntityAlreadyExists<Booking, int>(booking.ReservationNumber);
             }
             reservationNumber++;
-
             csvReader.WriteEntityInformation(booking.ToCSV());
-
-            csvReader.WriteRelationshipInformation(booking.ReservationNumber.ToString(), booking.Flights.Select(f => f.Number).ToList());
-
+            csvReader.WriteRelationshipInformation(booking.ReservationNumber.ToString(), 
+                booking.Flights.Select(f => f.Number).ToList());
             bookings.Add(booking);
-
             return booking;
         }
 
         public Booking Save(BookingDTO booking)
         {
-            var createdBooking = new Booking(reservationNumber, booking.Flights, booking.FlightClasses, booking.Type, booking.Passenger, booking.TotalPrice);
-
+            var createdBooking = new Booking(reservationNumber, booking.Flights, booking.FlightClasses, booking.Type, 
+                booking.Passenger, booking.TotalPrice);
             reservationNumber++;
-
             csvReader.WriteEntityInformation(createdBooking.ToCSV());
-
             csvReader.WriteRelationshipInformation(createdBooking.ReservationNumber.ToString(), booking.Flights.Select(f => f.Number).ToList());
-
             bookings.Add(createdBooking);
-
             return createdBooking;
         }
 
         public Booking? Update(int reservationNumber, Booking booking)
         {
-            if (bookings.Find(b => b.ReservationNumber == reservationNumber) == null)
+            if (bookings.Find(b => b.ReservationNumber == reservationNumber) is null)
             {
                 throw new EntityNotFound<Booking, int>(reservationNumber);
             }

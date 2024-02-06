@@ -10,7 +10,7 @@ namespace AirportBooking
         public FlightParameters GetFlightFilters(BookingType bookingType = BookingType.OneWay)
         {
             Console.WriteLine("Please write the country of origin:");
-            string originCountry = Console.ReadLine() ?? "";
+            var originCountry = Console.ReadLine() ?? "";
             while (originCountry.Equals(string.Empty))
             {
                 Console.WriteLine("Invalid input. Please try again.");
@@ -18,7 +18,7 @@ namespace AirportBooking
             }
 
             Console.WriteLine("Please write the destination country:");
-            string destinationCountry = Console.ReadLine() ?? "";
+            var destinationCountry = Console.ReadLine() ?? "";
             while (destinationCountry.Equals(string.Empty))
             {
                 Console.WriteLine("Invalid input. Please try again.");
@@ -31,13 +31,13 @@ namespace AirportBooking
                 M - Month number
                 D - Day of month number
                 """);
-            string date = Console.ReadLine() ?? "";
+            var date = Console.ReadLine() ?? "";
             while (date.Equals(string.Empty))
             {
                 Console.WriteLine("Invalid input. Please try again.");
                 date = Console.ReadLine() ?? "";
             }
-            DateTime departureDate = DateTime.Parse(date);
+            var departureDate = DateTime.Parse(date);
 
             DateTime? returnDate = null;
             if (bookingType == BookingType.RoundTrip)
@@ -58,11 +58,11 @@ namespace AirportBooking
             }
 
             Console.WriteLine("(Optional) Write a preferred departure airport:");
-            string? departureAirport = Console.ReadLine();
+            var departureAirport = Console.ReadLine();
             if (departureAirport is "") departureAirport = null;
 
             Console.WriteLine("(Optional) Write a preferred arrival airport:");
-            string? arrivalAirport = Console.ReadLine();
+            var arrivalAirport = Console.ReadLine();
             if (arrivalAirport is "") arrivalAirport = null;
 
             Console.WriteLine("""
@@ -80,24 +80,25 @@ namespace AirportBooking
             };
 
             Console.WriteLine("(Optional) Minimum price for the flight: ");
-            string price = Console.ReadLine() ?? "";
-            float minPrice = 0f;
+            var price = Console.ReadLine() ?? "";
+            var minPrice = 0f;
             if (!price.Equals(string.Empty)) minPrice = float.Parse(price);
 
             Console.WriteLine("(Optional) Maximum price for the flight: ");
             price = Console.ReadLine() ?? "";
-            float maxPrice = float.MaxValue;
+            var maxPrice = float.MaxValue;
             if (!price.Equals(string.Empty)) maxPrice = float.Parse(price);
 
-            return new FlightParameters(originCountry, destinationCountry, departureDate, returnDate, departureAirport, arrivalAirport, flightClass, minPrice, maxPrice);
+            return new FlightParameters(originCountry, destinationCountry, departureDate, returnDate,
+                departureAirport, arrivalAirport, flightClass, minPrice, maxPrice);
         }
 
         public Flight? GetFlight()
         {
             Console.WriteLine("Please type the flight number:");
-            string flightNumber = Console.ReadLine() ?? "";
+            var flightNumber = Console.ReadLine() ?? "";
             if (flightNumber is "") return null;
-            Flight? flight = repository.Find(flightNumber);
+            var flight = repository.Find(flightNumber);
             Console.WriteLine(flight is not null ? flight : $"Flight with number {flightNumber} not found");
             return flight;
         }

@@ -20,7 +20,8 @@ namespace AirportBooking.Views
         private void ShowUserBookings(User user)
         {
             Console.Clear();
-            repository.FindAll().Where(b => b.MainPassenger.Username.Equals(user.Username, StringComparison.OrdinalIgnoreCase)).ToList().ForEach(Console.WriteLine);
+            repository.FindAll().Where(b => b.MainPassenger.Username.Equals(user.Username,
+                StringComparison.OrdinalIgnoreCase)).ToList().ForEach(Console.WriteLine);
             Console.ReadLine();
             Console.Clear();
         }
@@ -33,7 +34,7 @@ namespace AirportBooking.Views
                 return null;
             }
             Console.WriteLine("Please indicate the reservation number of the booking: ");
-            string reservationNumber = Console.ReadLine() ?? "";
+            var reservationNumber = Console.ReadLine() ?? "";
             while (reservationNumber is "")
             {
                 Console.WriteLine("Invalid input, please try again.");
@@ -67,7 +68,7 @@ namespace AirportBooking.Views
                 2. Round trip
                 3. Go back
                 """);
-            string answer = Console.ReadLine() ?? "";
+            var answer = Console.ReadLine() ?? "";
             while (answer.Equals(""))
             {
                 Console.WriteLine("Invalid input, please try again");
@@ -87,7 +88,7 @@ namespace AirportBooking.Views
             var totalPrice = 0f;
 
             Console.WriteLine("Departure flight:");
-            Flight? departureFlight = flightView.GetFlight();
+            var departureFlight = flightView.GetFlight();
             while (departureFlight is null)
             {
                 Console.WriteLine("Invalid input, please try again");
@@ -95,7 +96,7 @@ namespace AirportBooking.Views
             }
 
             bookedFlights.Add(departureFlight);
-            FlightClass departureClass = flightView.ChooseFlightPrice(departureFlight);
+            var departureClass = flightView.ChooseFlightPrice(departureFlight);
             flightClasses.Add(departureClass);
             totalPrice += departureFlight.Prices[departureClass];
 
@@ -106,7 +107,7 @@ namespace AirportBooking.Views
                 flightView.ShowFlights(returnParameters);
 
                 Console.WriteLine("Return flight:");
-                Flight? returnFlight = flightView.GetFlight();
+                var returnFlight = flightView.GetFlight();
                 while (returnFlight is null)
                 {
                     Console.WriteLine("Invalid input, please try again");
@@ -114,7 +115,7 @@ namespace AirportBooking.Views
                 }
 
                 bookedFlights.Add(returnFlight);
-                FlightClass returnClass = flightView.ChooseFlightPrice(returnFlight);
+                var returnClass = flightView.ChooseFlightPrice(returnFlight);
                 flightClasses.Add(returnClass);
                 totalPrice += returnFlight.Prices[returnClass];
             }
@@ -145,7 +146,7 @@ namespace AirportBooking.Views
                 1. Edit
                 2. Delete
                 """);
-            string action = Console.ReadLine() ?? "";
+            var action = Console.ReadLine() ?? "";
             while (action is not ("1" or "2"))
             {
                 Console.WriteLine("Invalid input. Please try again");
@@ -164,7 +165,7 @@ namespace AirportBooking.Views
 
         private void EditBooking(Booking booking)
         {
-            bool isEditing = true;
+            var isEditing = true;
             while (isEditing)
             {
                 Console.WriteLine("""
@@ -173,7 +174,7 @@ namespace AirportBooking.Views
                 3. Modify booking flights' classes
                 4. Confirm changes
                 """);
-                string answer = Console.ReadLine() ?? "";
+                var answer = Console.ReadLine() ?? "";
                 Console.Clear();
                 switch (answer)
                 {
@@ -207,14 +208,17 @@ namespace AirportBooking.Views
 
         private Booking EditBookingType(Booking booking)
         {
-            Booking modifiedBooking = new(booking.ReservationNumber, booking.Flights, booking.FlightClasses, booking.BookingType, booking.MainPassenger, booking.Price);
-            BookingType changedBookingType = booking.BookingType.Equals(BookingType.RoundTrip) ? BookingType.OneWay : BookingType.RoundTrip;
+            var modifiedBooking = new Booking(booking.ReservationNumber, booking.Flights, booking.FlightClasses,
+                booking.BookingType, booking.MainPassenger, booking.Price);
+            var changedBookingType = booking.BookingType.Equals(BookingType.RoundTrip)
+                ? BookingType.OneWay
+                : BookingType.RoundTrip;
             modifiedBooking.BookingType = changedBookingType;
             if (changedBookingType == BookingType.RoundTrip)
             {
                 Console.WriteLine("Since you are changing the flight to Round Trip, you need to add a return flight:");
                 flightView.ShowFlights(flightView.GetFlightFilters());
-                Flight? flight = flightView.GetFlight();
+                var flight = flightView.GetFlight();
                 while (flight is null)
                 {
                     Console.WriteLine("No flight found. Please try again");
@@ -235,11 +239,12 @@ namespace AirportBooking.Views
 
         private Booking EditBookingFlights(Booking booking)
         {
-            Booking modifiedBooking = new(booking.ReservationNumber, booking.Flights, booking.FlightClasses, booking.BookingType, booking.MainPassenger, booking.Price);
+            var modifiedBooking = new Booking(booking.ReservationNumber, booking.Flights, booking.FlightClasses,
+                booking.BookingType, booking.MainPassenger, booking.Price);
             var modifiedFlights = new List<Flight>();
             var modifiedClasses = new List<FlightClass>();
             flightView.ShowFlights(flightView.GetFlightFilters());
-            Flight? departureFlight = flightView.GetFlight();
+            var departureFlight = flightView.GetFlight();
             while (departureFlight is null)
             {
                 Console.WriteLine("Couldn't find the specified flight. Please try again");
@@ -251,7 +256,7 @@ namespace AirportBooking.Views
             {
                 Console.WriteLine("Choose the return flight of the following list:");
                 flightView.ShowFlights(flightView.GetFlightFilters());
-                Flight? returnFlight = flightView.GetFlight();
+                var returnFlight = flightView.GetFlight();
                 while (returnFlight is null)
                 {
                     Console.WriteLine("Couldn't find the specified flight. Please try again");
@@ -266,20 +271,20 @@ namespace AirportBooking.Views
 
         private Booking EditBookingFlightsClasses(Booking booking)
         {
-            Booking modifiedBooking = new(booking.ReservationNumber, booking.Flights, booking.FlightClasses, booking.BookingType, booking.MainPassenger, booking.Price);
-            FlightClass[] allClasses = [FlightClass.Economy, FlightClass.Business, FlightClass.FirstClass];
+            var modifiedBooking = new Booking(booking.ReservationNumber, booking.Flights, booking.FlightClasses, booking.BookingType, booking.MainPassenger, booking.Price);
+            var allClasses = new FlightClass[] { FlightClass.Economy, FlightClass.Business, FlightClass.FirstClass };
             for (var i = 0; i < booking.Flights.Count; i++)
             {
                 Console.WriteLine($"""
                     Select the new class for the following flight:
                     {booking.Flights[i]}
                     """);
-                FlightClass[] availableOptions = allClasses.Where(c => !c.Equals(modifiedBooking.FlightClasses[i])).ToArray();
+                var availableOptions = allClasses.Where(c => !c.Equals(modifiedBooking.FlightClasses[i])).ToArray();
                 for (var j = 0; j < availableOptions.Length; j++)
                 {
                     Console.WriteLine($"{j + 1}. {availableOptions[j]}");
                 }
-                string chosenClass = Console.ReadLine() ?? "";
+                var chosenClass = Console.ReadLine() ?? "";
                 while (chosenClass is "" || int.Parse(chosenClass) < 0 || int.Parse(chosenClass) > availableOptions.Length)
                 {
                     Console.WriteLine("Invalid input. Please try again");
@@ -317,7 +322,7 @@ namespace AirportBooking.Views
                 1. Yes
                 2. No
                 """);
-            string answer = Console.ReadLine() ?? "";
+            var answer = Console.ReadLine() ?? "";
             while (answer is not ("1" or "2"))
             {
                 Console.WriteLine("Invalid input. Please try again");
@@ -341,7 +346,7 @@ namespace AirportBooking.Views
 
         private void ShowBookingManagerMenu()
         {
-            bool exit = false;
+            var exit = false;
             while (!exit && CurrentUser is not null)
             {
                 Console.WriteLine("""
@@ -355,7 +360,7 @@ namespace AirportBooking.Views
                     2. Search booking by reservation number
                     """);
 
-                string answer = Console.ReadLine() ?? "";
+                var answer = Console.ReadLine() ?? "";
                 while (answer is not ("1" or "2"))
                 {
                     Console.WriteLine("Invalid input, please try again.");
@@ -460,7 +465,7 @@ namespace AirportBooking.Views
                     4. Logout.
                     """);
 
-                string? option = Console.ReadLine();
+                var option = Console.ReadLine();
                 Console.Clear();
                 switch (option)
                 {
@@ -498,7 +503,7 @@ namespace AirportBooking.Views
                     4. Logout.
                     """);
 
-                string? option = Console.ReadLine();
+                var option = Console.ReadLine();
                 switch (option)
                 {
                     case "1":
@@ -531,7 +536,7 @@ namespace AirportBooking.Views
                 2. Register
                 3. Exit
                 """);
-                string? answer = Console.ReadLine();
+                var answer = Console.ReadLine();
                 Console.Clear();
                 switch (answer)
                 {

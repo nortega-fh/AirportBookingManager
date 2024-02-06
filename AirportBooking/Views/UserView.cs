@@ -19,10 +19,10 @@ namespace AirportBooking
                     - ############################################## -
                     """);
                 Console.WriteLine("Please write your username:");
-                string? username = Console.ReadLine();
+                var username = Console.ReadLine();
 
                 Console.WriteLine("Please write your password:");
-                string? password = Console.ReadLine();
+                var password = Console.ReadLine();
 
                 try
                 {
@@ -50,10 +50,10 @@ namespace AirportBooking
                     - ############################################## -
                     """);
                 Console.WriteLine("Please write your username:");
-                string? username = Console.ReadLine();
+                var username = Console.ReadLine();
 
                 Console.WriteLine("Please write your password:");
-                string? password = Console.ReadLine();
+                var password = Console.ReadLine();
 
                 try
                 {

@@ -10,14 +10,14 @@ namespace AirportBooking.Lib
 
         public IEnumerable<string> ReadEntityInformation()
         {
-            List<string> lines = [];
+            var lines = new List<string> { };
             try
             {
                 using var reader = File.OpenText(filePath);
                 var line = reader.ReadLine();
                 // Skip header line
                 line = reader.ReadLine();
-                while (line is not null && !line.Equals(""))
+                while (line is not null && !line.Equals(string.Empty))
                 {
                     lines.Add(line);
                     line = reader.ReadLine();
@@ -39,8 +39,7 @@ namespace AirportBooking.Lib
                 writer.WriteLine(line);
             }
             catch (Exception e) when (e is IOException or DirectoryNotFoundException)
-            {
-
+            { 
                 Console.WriteLine($"Couldn't handle file {filePath}: {e.Message}");
             }
         }
@@ -49,8 +48,7 @@ namespace AirportBooking.Lib
         {
             try
             {
-                var lines = File.ReadAllLines(filePath);
-                
+                var lines = File.ReadAllLines(filePath);  
                 for (var i = 0; i < lines.Length; i++)
                 {
                     var data = lines[i].Split(",");
