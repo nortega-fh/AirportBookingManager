@@ -1,55 +1,24 @@
 ﻿using AirportBooking.Enums;
 
-namespace AirportBooking
+namespace AirportBooking.Models
 {
-    public class Booking : ICSVEntity
+    public class Booking
     {
         public int ReservationNumber { get; set; }
-        public List<Flight> Flights { get; set; }
-        public float Price { get; set; }
+        public List<Flight> Flights { get; set; } = [];
         public BookingType BookingType { get; set; }
-        public List<FlightClass> FlightClasses { get; set; }
-        public User MainPassenger { get; set; }
+        public List<FlightClass> FlightClasses { get; set; } = [];
+        public User? MainPassenger { get; set; } = null;
 
-        public Booking(List<Flight> flights, List<FlightClass> flightClasses, BookingType type, User passenger, float totalPrice)
+        public float CalculatePrice()
         {
-            Flights = flights;
-            Price = totalPrice;
-            BookingType = type;
-            FlightClasses = flightClasses;
-            MainPassenger = passenger;
-        }
-
-        public Booking(int reservationNumber, List<Flight> flights, List<FlightClass> flightClasses, BookingType type, User passenger, float totalPrice)
-        {
-            ReservationNumber = reservationNumber;
-            Flights = flights;
-            Price = totalPrice;
-            BookingType = type;
-            FlightClasses = flightClasses;
-            MainPassenger = passenger;
-        }
-
-        public void UpdatePrice()
-        {
-            Price = 0f;
+            var price = 0f;
             for (var i = 0; i < Flights.Count; i++)
             {
-                Price += Flights[i].Prices[FlightClasses[i]];
+                price += Flights[i].ClassPrices[FlightClasses[i]];
             }
-
+            return price;
         }
-
-        public string ToCSV() => string.Join(",", [ReservationNumber, Price, BookingType, FlightClasses.First(), FlightClasses.Last(), MainPassenger.Username]);
-
-        public string BookingFlightsToString()
-        {
-            string format = "";
-            Flights.ForEach(f => format += f.ToString() + "\n");
-            return format;
-        }
-
-        public string FlightClassesToString() => string.Join(",", FlightClasses);
 
         public override string ToString()
         {
@@ -58,16 +27,15 @@ namespace AirportBooking
                          Booking {ReservationNumber}
                 ######################################
                 Flights:
-                {BookingFlightsToString()}
+                {string.Join("\n", Flights)}
                 Booking type: {BookingType}
-                Class: {FlightClassesToString()}
+                Class: {string.Join(",", FlightClasses)}
                 Passenger:
                 {MainPassenger}
                 --------------------------------------
-                    Total price: ${Price}
+                    Total price: ${CalculatePrice()}
                 --------------------------------------
                 """;
         }
-
     }
 }

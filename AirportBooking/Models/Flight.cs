@@ -1,9 +1,9 @@
 ﻿using AirportBooking.Enums;
 
-namespace AirportBooking
+namespace AirportBooking.Models
 {
     public class Flight(string number, SortedDictionary<FlightClass, float> prices, string originCountry, string destinationCountry,
-        DateTime departureDate, DateTime arrivalDate, string originAirport, string destinationAirport) : ICSVEntity
+        DateTime departureDate, DateTime arrivalDate, string originAirport, string destinationAirport)
     {
         public string Number { get; set; } = number;
         public string OriginCountry { get; set; } = originCountry;
@@ -12,14 +12,14 @@ namespace AirportBooking
         public DateTime ArrivalDate { get; set; } = arrivalDate;
         public string OriginAirport { get; set; } = originAirport;
         public string DestinationAirport { get; set; } = destinationAirport;
-        public SortedDictionary<FlightClass, float> Prices { get; set; } = prices;
+        public SortedDictionary<FlightClass, float> ClassPrices { get; set; } = prices;
 
-        public string ToCSV() => string.Join(",", [Number, .. Prices.Values, OriginCountry, DestinationCountry, DepartureDate, ArrivalDate, OriginAirport, DestinationAirport]);
+        public string ToCSV() => string.Join(",", [Number, .. ClassPrices.Values, OriginCountry, DestinationCountry, DepartureDate, ArrivalDate, OriginAirport, DestinationAirport]);
 
         public string PricesToString()
         {
             string format = "";
-            foreach (KeyValuePair<FlightClass, float> f in Prices)
+            foreach (KeyValuePair<FlightClass, float> f in ClassPrices)
             {
                 format += $"{f.Key}: {f.Value}\n";
             }

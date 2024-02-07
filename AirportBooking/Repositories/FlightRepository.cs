@@ -81,14 +81,14 @@ namespace AirportBooking
             return flights.Find(f => f.Number.Equals(flightNumber, StringComparison.OrdinalIgnoreCase));
         }
 
-        public IEnumerable<Flight> FindBySearchParameters(FlightParameters parameters)
+        public IEnumerable<Flight> FindBySearchParameters(FlightSearchParameters parameters)
         {
             IEnumerable<Flight> resultFlights = flights
                 .Where(f => f.OriginCountry.Contains(parameters.OriginCountry, StringComparison.OrdinalIgnoreCase))
                 .Where(f => f.DestinationCountry.Contains(parameters.DestinationCountry, StringComparison.OrdinalIgnoreCase))
                 .Where(f => parameters.DepartureDate <= f.DepartureDate && f.DepartureDate < parameters.DepartureDate.AddDays(1)
                 && f.DepartureDate > parameters.DepartureDate.AddDays(-1))
-                .Where(f => f.Prices.Values.Min() >= parameters.MinPrice && f.Prices.Values.Min() <= parameters.MaxPrice);
+                .Where(f => f.ClassPrices.Values.Min() >= parameters.MinPrice && f.ClassPrices.Values.Min() <= parameters.MaxPrice);
             if (parameters.DepartureAirport is (not null) and (not ""))
             {
                 resultFlights = resultFlights.Where(f => f.OriginAirport.Equals(parameters.DepartureAirport,
@@ -101,7 +101,7 @@ namespace AirportBooking
             }
             if (parameters.FlightClass is not null)
             {
-                resultFlights = resultFlights.Where(f => f.Prices.ContainsKey(parameters.FlightClass.Value));
+                resultFlights = resultFlights.Where(f => f.ClassPrices.ContainsKey(parameters.FlightClass.Value));
             }
             return resultFlights;
         }

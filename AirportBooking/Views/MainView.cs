@@ -1,4 +1,5 @@
 ﻿using AirportBooking.Enums;
+using AirportBooking.Models;
 
 namespace AirportBooking.Views
 {
@@ -20,7 +21,7 @@ namespace AirportBooking.Views
         private void ShowUserBookings(User user)
         {
             Console.Clear();
-            repository.FindAll().Where(b => b.MainPassenger.Username.Equals(user.Username,
+            repository.FindAll().Where(b => b.MainPassenger!.Username.Equals(user.Username,
                 StringComparison.OrdinalIgnoreCase)).ToList().ForEach(Console.WriteLine);
             Console.ReadLine();
             Console.Clear();
@@ -98,7 +99,7 @@ namespace AirportBooking.Views
             bookedFlights.Add(departureFlight);
             var departureClass = flightView.ChooseFlightPrice(departureFlight);
             flightClasses.Add(departureClass);
-            totalPrice += departureFlight.Prices[departureClass];
+            totalPrice += departureFlight.ClassPrices[departureClass];
 
             if (bookingType is BookingType.RoundTrip && flightParameters.ReturnDate is not null)
             {
@@ -117,10 +118,16 @@ namespace AirportBooking.Views
                 bookedFlights.Add(returnFlight);
                 var returnClass = flightView.ChooseFlightPrice(returnFlight);
                 flightClasses.Add(returnClass);
-                totalPrice += returnFlight.Prices[returnClass];
+                totalPrice += returnFlight.ClassPrices[returnClass];
             }
 
-            var obtainedBooking = new BookingDTO(bookedFlights, flightClasses, bookingType, CurrentUser, totalPrice);
+            var obtainedBooking = new Booking
+            {
+                Flights = bookedFlights,
+                FlightClasses = flightClasses,
+                BookingType = bookingType,
+                MainPassenger = CurrentUser
+            };
 
             Console.WriteLine($"""
                 Summary of your booking:
@@ -208,8 +215,14 @@ namespace AirportBooking.Views
 
         private Booking EditBookingType(Booking booking)
         {
-            var modifiedBooking = new Booking(booking.ReservationNumber, booking.Flights, booking.FlightClasses,
-                booking.BookingType, booking.MainPassenger, booking.Price);
+            var modifiedBooking = new Booking
+            {
+                ReservationNumber = booking.ReservationNumber,
+                Flights = booking.Flights,
+                FlightClasses = booking.FlightClasses,
+                BookingType = booking.BookingType,
+                MainPassenger = booking.MainPassenger
+            };
             var changedBookingType = booking.BookingType.Equals(BookingType.RoundTrip)
                 ? BookingType.OneWay
                 : BookingType.RoundTrip;
@@ -233,14 +246,19 @@ namespace AirportBooking.Views
                 modifiedBooking.Flights = modifiedBooking.Flights.Take(modifiedBooking.Flights.Count - 1).ToList();
                 modifiedBooking.FlightClasses = modifiedBooking.FlightClasses.Take(modifiedBooking.FlightClasses.Count - 1).ToList();
             }
-            modifiedBooking.UpdatePrice();
             return ConfirmUpdate(modifiedBooking, booking);
         }
 
         private Booking EditBookingFlights(Booking booking)
         {
-            var modifiedBooking = new Booking(booking.ReservationNumber, booking.Flights, booking.FlightClasses,
-                booking.BookingType, booking.MainPassenger, booking.Price);
+            var modifiedBooking = new Booking
+            {
+                ReservationNumber = booking.ReservationNumber,
+                Flights = booking.Flights,
+                FlightClasses = booking.FlightClasses,
+                BookingType = booking.BookingType,
+                MainPassenger = booking.MainPassenger
+            };
             var modifiedFlights = new List<Flight>();
             var modifiedClasses = new List<FlightClass>();
             flightView.ShowFlights(flightView.GetFlightFilters());
@@ -265,13 +283,19 @@ namespace AirportBooking.Views
                 modifiedClasses.Add(flightView.ChooseFlightPrice(returnFlight));
                 modifiedFlights.Add(returnFlight);
             }
-            modifiedBooking.UpdatePrice();
             return ConfirmUpdate(modifiedBooking, booking);
         }
 
         private Booking EditBookingFlightsClasses(Booking booking)
         {
-            var modifiedBooking = new Booking(booking.ReservationNumber, booking.Flights, booking.FlightClasses, booking.BookingType, booking.MainPassenger, booking.Price);
+            var modifiedBooking = new Booking
+            {
+                ReservationNumber = booking.ReservationNumber,
+                Flights = booking.Flights,
+                FlightClasses = booking.FlightClasses,
+                BookingType = booking.BookingType,
+                MainPassenger = booking.MainPassenger,
+            };
             var allClasses = new FlightClass[] { FlightClass.Economy, FlightClass.Business, FlightClass.FirstClass };
             for (var i = 0; i < booking.Flights.Count; i++)
             {
@@ -292,7 +316,6 @@ namespace AirportBooking.Views
                 }
                 modifiedBooking.FlightClasses[i] = availableOptions[int.Parse(chosenClass) - 1];
             }
-            modifiedBooking.UpdatePrice();
             return ConfirmUpdate(modifiedBooking, booking);
         }
 

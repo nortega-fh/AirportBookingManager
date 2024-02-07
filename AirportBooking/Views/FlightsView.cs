@@ -1,5 +1,6 @@
 ﻿using AirportBooking.Enums;
 using AirportBooking.Helpers;
+using AirportBooking.Models;
 
 namespace AirportBooking
 {
@@ -7,7 +8,7 @@ namespace AirportBooking
     {
         private readonly FlightRepository repository = repository;
 
-        public FlightParameters GetFlightFilters(BookingType bookingType = BookingType.OneWay)
+        public FlightSearchParameters GetFlightFilters(BookingType bookingType = BookingType.OneWay)
         {
             Console.WriteLine("Please write the country of origin:");
             var originCountry = Console.ReadLine() ?? "";
@@ -89,7 +90,7 @@ namespace AirportBooking
             var maxPrice = float.MaxValue;
             if (!price.Equals(string.Empty)) maxPrice = float.Parse(price);
 
-            return new FlightParameters(originCountry, destinationCountry, departureDate, returnDate,
+            return new FlightSearchParameters(originCountry, destinationCountry, departureDate, returnDate,
                 departureAirport, arrivalAirport, flightClass, minPrice, maxPrice);
         }
 
@@ -121,7 +122,7 @@ namespace AirportBooking
             };
         }
 
-        public void ShowFlights(FlightParameters? parameters = null)
+        public void ShowFlights(FlightSearchParameters? parameters = null)
         {
             Console.Clear();
             var flights = parameters is null ? repository.FindAll().ToList() : repository.FindBySearchParameters(parameters).ToList();

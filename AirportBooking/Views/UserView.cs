@@ -1,5 +1,5 @@
 ﻿using AirportBooking.Enums;
-
+using AirportBooking.Models;
 namespace AirportBooking
 {
     public class UserView(UserRepository userRepository)
