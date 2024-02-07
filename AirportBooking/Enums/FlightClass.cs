@@ -1,9 +1,8 @@
-﻿namespace AirportBooking.Enums
+﻿namespace AirportBooking.Enums;
+
+public enum FlightClass
 {
-    public enum FlightClass
-    {
-        Economy,
-        Business,
-        FirstClass
-    }
+    Economy,
+    Business,
+    FirstClass
 }

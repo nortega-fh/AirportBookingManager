@@ -1,147 +1,106 @@
-﻿using AirportBooking.Enums;
-using AirportBooking.Helpers;
+﻿using AirportBooking.DTOs;
 using AirportBooking.Lib;
+using AirportBooking.Models;
+using AirportBooking.Serializers.CSVSerializers;
+using AirportBooking.Validators.EntityValidators;
+using System.Collections.Immutable;
 
-namespace AirportBooking
+namespace AirportBooking.Repositories;
+
+public class FlightRepository : IFileRepository<string, Flight>
 {
-    public class FlightRepository : IFileRepository<string, Flight>
+    private List<Flight> _flights = [];
+    private readonly CSVReader _reader = new("flights");
+    private readonly FlightCsvSerializer _serializer = new();
+    private readonly FlightValidator _validator = new();
+    public FlightRepository()
     {
-        private List<Flight> flights = [];
-        private readonly CSVReader flightCSVReader = new("flights");
-        public FlightRepository()
+        try
         {
-            try
-            {
-                Load();
-            }
-            catch (Exception ex) when (ex is ArgumentException || ex is InvalidAttributeException<string> || ex is InvalidAttributeException<DateTime>)
-            {
-                flights.Clear();
-                Console.WriteLine(ex.Message);
-            }
+            Load();
         }
+        catch (Exception ex) when (ex is ArgumentException || ex is InvalidAttributeException)
+        {
+            _flights.Clear();
+            Console.WriteLine("Couldn't load flight data");
+            Console.WriteLine(ex.Message);
+        }
+    }
 
-        private Flight Validate(string[] attributes)
-        {
-            if (attributes.Length < 10)
-                throw new ArgumentException($"The data for the flight in line {string.Join(",", attributes)} is incomplete");
-            try
-            {
-                (string number, string economyPrice, string businessPrice, string firstClassPrice, string originCountry,
-                    string destinationCountry, DateTime departureDate, DateTime arrivalDate, string originAirport,
-                    string destinationAirport) = (attributes[0], attributes[1], attributes[2], attributes[3], attributes[4],
-                    attributes[5], DateTime.Parse(attributes[6]), DateTime.Parse(attributes[7]), attributes[8], attributes[9]);
-                if (number is "") throw new InvalidAttributeException<string>(number, ["Required"]);
-                if (originCountry is "") throw new InvalidAttributeException<string>(originCountry, ["Required"]);
-                if (destinationCountry is "") throw new InvalidAttributeException<string>(destinationCountry, ["Required"]);
-                if (originAirport is "") throw new InvalidAttributeException<string>(originAirport, ["Required"]);
-                if (destinationAirport is "") throw new InvalidAttributeException<string>(destinationAirport, ["Required"]);
-                if (!economyPrice.Equals("") && float.IsNaN(float.Parse(economyPrice)))
-                    throw new InvalidAttributeException<string>(destinationAirport, ["Required",
-                        "Valid values (Can be a space \"\" (To skip) or numbers with decimal part after a dot (FF.FF))"]);
-                if (!businessPrice.Equals("") && float.IsNaN(float.Parse(businessPrice)))
-                    throw new InvalidAttributeException<string>(destinationAirport, ["Required",
-                        "Valid values (Can be a space \"\" (To skip) or numbers with decimal part after a dot  (FF.FF))"]);
-                if (!firstClassPrice.Equals("") && float.IsNaN(float.Parse(firstClassPrice)))
-                    throw new InvalidAttributeException<string>(destinationAirport, ["Required",
-                        "Valid values (Can be a space \"\" (To skip) or numbers numbers with decimal part after a dot (FF.FF))"]);
-                if (arrivalDate < departureDate) throw new InvalidAttributeException<DateTime>(arrivalDate, ["Required",
-                    "Valid range (Greater than or equal to Departure Date)"]);
-                var prices = new SortedDictionary<FlightClass, float> { };
-                if (economyPrice is not "")
-                    prices.Add(FlightClass.Economy, float.Parse(economyPrice.Replace(".", ",")));
-                if (businessPrice is not "")
-                    prices.Add(FlightClass.Business, float.Parse(businessPrice.Replace(".", ",")));
-                if (firstClassPrice is not "")
-                    prices.Add(FlightClass.FirstClass, float.Parse(firstClassPrice.Replace(".", ",")));
-                return new Flight(number, prices, originCountry, destinationCountry, departureDate, arrivalDate,
-                    originAirport, destinationAirport);
-            }
-            catch (ArgumentException)
-            {
-                throw new ArgumentException($"Invalid date format for line {string.Join(",",
-                    attributes)} - Dates should be in format YYYY-MM-DDTHH:mm:ssZ");
-            }
-        }
+    public void Load()
+    {
+        var readFlights = _reader.ReadEntityInformation().ToList();
+        readFlights.ForEach(line => _flights.Add(_serializer.FromCsv(line)));
+    }
 
-        private void TransformLineToFlight(string line)
-        {
-            var flight = Validate(line.Split(','));
-            flights.Add(flight);
-        }
+    public Flight? Find(string flightNumber)
+    {
+        return _flights.Find(f => f.Number.Equals(flightNumber, StringComparison.OrdinalIgnoreCase));
+    }
 
-        public void Load()
+    public IReadOnlyList<Flight> FindBySearchParameters(FlightSearchParameters parameters)
+    {
+        IEnumerable<Flight> resultFlights = _flights
+            .Where(f => f.OriginCountry.Contains(parameters.OriginCountry, StringComparison.OrdinalIgnoreCase))
+            .Where(f => f.DestinationCountry.Contains(parameters.DestinationCountry, StringComparison.OrdinalIgnoreCase))
+            .Where(f => parameters.DepartureDate <= f.DepartureDate && f.DepartureDate < parameters.DepartureDate.AddDays(1)
+            && f.DepartureDate > parameters.DepartureDate.AddDays(-1))
+            .Where(f => f.ClassPrices.Values.Min() >= parameters.MinPrice && f.ClassPrices.Values.Min() <= parameters.MaxPrice);
+        if (parameters.DepartureAirport is (not null) and (not ""))
         {
-            var readFlights = flightCSVReader.ReadEntityInformation().ToList();
-            readFlights.ForEach(TransformLineToFlight);
+            resultFlights = resultFlights.Where(f => f.OriginAirport.Equals(parameters.DepartureAirport,
+                StringComparison.OrdinalIgnoreCase));
         }
+        if (parameters.ArrivalAirport is (not null) and (not ""))
+        {
+            resultFlights = resultFlights.Where(f => f.DestinationAirport.Equals(parameters.ArrivalAirport,
+                StringComparison.OrdinalIgnoreCase));
+        }
+        if (parameters.FlightClass is not null)
+        {
+            resultFlights = resultFlights.Where(f => f.ClassPrices.ContainsKey(parameters.FlightClass.Value));
+        }
+        return resultFlights.ToImmutableList();
+    }
 
-        public Flight? Find(string flightNumber)
-        {
-            return flights.Find(f => f.Number.Equals(flightNumber, StringComparison.OrdinalIgnoreCase));
-        }
+    public IReadOnlyList<Flight> FindAll()
+    {
+        return _flights;
+    }
 
-        public IEnumerable<Flight> FindBySearchParameters(FlightSearchParameters parameters)
+    public Flight Save(Flight flight)
+    {
+        var existingFlight = _flights.Find(f => f.Number.Equals(flight.Number, StringComparison.OrdinalIgnoreCase));
+        if (existingFlight is not null)
         {
-            IEnumerable<Flight> resultFlights = flights
-                .Where(f => f.OriginCountry.Contains(parameters.OriginCountry, StringComparison.OrdinalIgnoreCase))
-                .Where(f => f.DestinationCountry.Contains(parameters.DestinationCountry, StringComparison.OrdinalIgnoreCase))
-                .Where(f => parameters.DepartureDate <= f.DepartureDate && f.DepartureDate < parameters.DepartureDate.AddDays(1)
-                && f.DepartureDate > parameters.DepartureDate.AddDays(-1))
-                .Where(f => f.ClassPrices.Values.Min() >= parameters.MinPrice && f.ClassPrices.Values.Min() <= parameters.MaxPrice);
-            if (parameters.DepartureAirport is (not null) and (not ""))
-            {
-                resultFlights = resultFlights.Where(f => f.OriginAirport.Equals(parameters.DepartureAirport,
-                    StringComparison.OrdinalIgnoreCase));
-            }
-            if (parameters.ArrivalAirport is (not null) and (not ""))
-            {
-                resultFlights = resultFlights.Where(f => f.DestinationAirport.Equals(parameters.ArrivalAirport,
-                    StringComparison.OrdinalIgnoreCase));
-            }
-            if (parameters.FlightClass is not null)
-            {
-                resultFlights = resultFlights.Where(f => f.ClassPrices.ContainsKey(parameters.FlightClass.Value));
-            }
-            return resultFlights;
+            throw new EntityAlreadyExists<Flight, string>(flight.Number);
         }
+        _validator.Validate(flight);
+        _reader.WriteEntityInformation(_serializer.ToCsv(flight));
+        _flights.Add(flight);
+        return flight;
+    }
 
-        public IEnumerable<Flight> FindAll()
+    public Flight? Update(string flightNumber, Flight newFlight)
+    {
+        if (_flights.Find(f => f.Number.Equals(flightNumber, StringComparison.OrdinalIgnoreCase)) is null)
         {
-            return flights;
+            throw new EntityNotFound<Flight, string>(flightNumber);
         }
+        _validator.Validate(newFlight);
+        _reader.UpdateEntityInformation(flightNumber, _serializer.ToCsv(newFlight));
+        _flights = _flights.Select(f => f.Number.Equals(flightNumber,
+            StringComparison.OrdinalIgnoreCase) ? newFlight : f).ToList();
+        return newFlight;
+    }
 
-        public Flight Save(Flight flight)
+    public void Delete(string flightNumber)
+    {
+        if (_flights.Find(f => f.Number.Equals(flightNumber, StringComparison.OrdinalIgnoreCase)) is null)
         {
-            var existingFlight = flights.Find(f => f.Number.Equals(flight.Number, StringComparison.OrdinalIgnoreCase));
-            if (existingFlight is not null)
-            {
-                throw new EntityAlreadyExists<Flight, string>(flight.Number);
-            }
-            flightCSVReader.WriteEntityInformation(flight.ToCSV());
-            flights.Add(flight);
-            return flight;
+            throw new EntityNotFound<Flight, string>(flightNumber);
         }
-
-        public Flight? Update(string flightNumber, Flight newFlight)
-        {
-            if (flights.Find(f => f.Number.Equals(flightNumber, StringComparison.OrdinalIgnoreCase)) is null)
-            {
-                throw new EntityNotFound<Flight, string>(flightNumber);
-            }
-            flightCSVReader.UpdateEntityInformation(flightNumber, newFlight.ToCSV());
-            flights = flights.Select(f => f.Number.Equals(flightNumber,
-                StringComparison.OrdinalIgnoreCase) ? newFlight : f).ToList();
-            return newFlight;
-        }
-
-        public void Delete(string flightNumber)
-        {
-            if (flights.Find(f => f.Number.Equals(flightNumber, StringComparison.OrdinalIgnoreCase)) is null)
-            {
-                throw new EntityNotFound<Flight, string>(flightNumber);
-            }
-            flights = flights.Where(f => !f.Number.Equals(flightNumber, StringComparison.OrdinalIgnoreCase)).ToList();
-        }
+        _reader.DeleteEntityInformation(flightNumber);
+        _flights = _flights.Where(f => !f.Number.Equals(flightNumber, StringComparison.OrdinalIgnoreCase)).ToList();
     }
 }

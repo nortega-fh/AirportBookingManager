@@ -1,3 +1,3 @@
 ﻿namespace AirportBooking.Exceptions;
 
-public class EntitySerializationException(string reason) : Exception($"Couldn't serialize: {reason}");
+public class EntitySerializationException<T>(string reason) : Exception($"Couldn't serialize {typeof(T).Name}: {reason}");

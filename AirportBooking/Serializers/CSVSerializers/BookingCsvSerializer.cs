@@ -30,7 +30,7 @@ public class BookingCsvSerializer : ICSVSerializer<Booking>
     private static void ValidateCsvLine(string csvLine)
     {
         var data = csvLine.Split(",");
-        var error = new EntitySerializationException($"Incomplete data on line {csvLine}");
+        var error = new EntitySerializationException<Booking>($"Incomplete data on line {csvLine}");
         if (data.Length < 2) throw error;
         var bookingType = Enum.Parse<BookingType>(data[1]);
         if (bookingType is BookingType.OneWay && data.Length < 4) throw error;
@@ -39,7 +39,7 @@ public class BookingCsvSerializer : ICSVSerializer<Booking>
 
     public string ToCsv(Booking booking)
     {
-        if (booking.MainPassenger is null) throw new EntitySerializationException("Booking passenger can't be null");
+        if (booking.MainPassenger is null) throw new EntitySerializationException<Booking>("Booking passenger can't be null");
         return string.Join(",", [booking.ReservationNumber,
             booking.BookingType,
             .. booking.FlightClasses,

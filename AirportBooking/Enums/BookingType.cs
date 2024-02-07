@@ -1,8 +1,7 @@
-﻿namespace AirportBooking.Enums
+﻿namespace AirportBooking.Enums;
+
+public enum BookingType
 {
-    public enum BookingType
-    {
-        OneWay,
-        RoundTrip
-    }
+    OneWay,
+    RoundTrip
 }

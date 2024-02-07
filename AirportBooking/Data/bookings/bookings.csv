@@ -1,4 +1,4 @@
-ReservationNumber,BookingType,FirstFlightClass,SecondFlightClass,Passenger
+ReservationNumber,BookingType,FirstFlightClass,(Optional)SecondFlightClass,Passenger
 1,RoundTrip,Economy,Business,passenger
-2,OneWay,Business,Business,passenger
+2,OneWay,Business,passenger
 3,RoundTrip,Economy,Business,passenger

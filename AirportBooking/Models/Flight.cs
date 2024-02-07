@@ -1,32 +1,28 @@
 ﻿using AirportBooking.Enums;
 
-namespace AirportBooking.Models
+namespace AirportBooking.Models;
+
+public class Flight
 {
-    public class Flight(string number, SortedDictionary<FlightClass, float> prices, string originCountry, string destinationCountry,
-        DateTime departureDate, DateTime arrivalDate, string originAirport, string destinationAirport)
+    public string Number { get; set; } = string.Empty;
+    public string OriginCountry { get; set; } = string.Empty;
+    public string DestinationCountry { get; set; } = string.Empty;
+    public DateTime DepartureDate { get; set; } = DateTime.Now;
+    public DateTime ArrivalDate { get; set; } = DateTime.Now;
+    public string OriginAirport { get; set; } = string.Empty;
+    public string DestinationAirport { get; set; } = string.Empty;
+    public SortedDictionary<FlightClass, float> ClassPrices { get; set; } = [];
+
+    public string PricesToString()
     {
-        public string Number { get; set; } = number;
-        public string OriginCountry { get; set; } = originCountry;
-        public string DestinationCountry { get; set; } = destinationCountry;
-        public DateTime DepartureDate { get; set; } = departureDate;
-        public DateTime ArrivalDate { get; set; } = arrivalDate;
-        public string OriginAirport { get; set; } = originAirport;
-        public string DestinationAirport { get; set; } = destinationAirport;
-        public SortedDictionary<FlightClass, float> ClassPrices { get; set; } = prices;
-
-        public string ToCSV() => string.Join(",", [Number, .. ClassPrices.Values, OriginCountry, DestinationCountry, DepartureDate, ArrivalDate, OriginAirport, DestinationAirport]);
-
-        public string PricesToString()
+        string format = "";
+        foreach (KeyValuePair<FlightClass, float> f in ClassPrices)
         {
-            string format = "";
-            foreach (KeyValuePair<FlightClass, float> f in ClassPrices)
-            {
-                format += $"{f.Key}: {f.Value}\n";
-            }
-            return format;
+            format += $"{f.Key}: {f.Value}\n";
         }
-        public override string ToString() => $"""
+        return format;
+    }
+    public override string ToString() => $"""
             {Number} / {OriginCountry} ({OriginAirport}) - {DestinationCountry} ({DestinationAirport}) / {DepartureDate} - {ArrivalDate}
             """;
-    }
 }

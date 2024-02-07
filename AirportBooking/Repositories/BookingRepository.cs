@@ -2,16 +2,16 @@
 using AirportBooking.Lib;
 using AirportBooking.Models;
 using AirportBooking.Serializers.CSVSerializers;
-using AirportBooking.Validators;
+using AirportBooking.Validators.EntityValidators;
 
-namespace AirportBooking;
+namespace AirportBooking.Repositories;
 
 public class BookingRepository : IFileRepository<int, Booking>
 {
     private static int _reservationNumber = 1;
     private List<Booking> _bookings = [];
-    private readonly CSVReader _csvReader = new("bookings", "flights");
-    private static readonly BookingCsvSerializer _bookingCsvSerializer = new();
+    private readonly CSVReader _reader = new("bookings", "flights");
+    private static readonly BookingCsvSerializer _serializer = new();
     private readonly BookingValidator _validator = new();
     private readonly IFileRepository<string, User> _userRepository;
     private readonly IFileRepository<string, Flight> _flightRepository;
@@ -24,7 +24,7 @@ public class BookingRepository : IFileRepository<int, Booking>
         {
             Load();
         }
-        catch (Exception e) when (e is ArgumentException or EntitySerializationException or InvalidAttributeException)
+        catch (Exception e) when (e is ArgumentException or EntitySerializationException<Booking> or InvalidAttributeException)
         {
             _bookings.Clear();
             Console.WriteLine("Couldn't load booking information due to incorrect data:");
@@ -34,8 +34,8 @@ public class BookingRepository : IFileRepository<int, Booking>
 
     public void Load()
     {
-        var storedBookings = _csvReader.ReadEntityInformation().ToList();
-        storedBookings.ForEach(line => _bookings.Add(_bookingCsvSerializer.FromCsv(line)));
+        var storedBookings = _reader.ReadEntityInformation().ToList();
+        storedBookings.ForEach(line => _bookings.Add(_serializer.FromCsv(line)));
         _bookings.ForEach(booking =>
         {
             booking.Flights = FindBookingFlights(booking.ReservationNumber);
@@ -48,7 +48,7 @@ public class BookingRepository : IFileRepository<int, Booking>
 
     private List<Flight> FindBookingFlights(int bookingId)
     {
-        var hasFlights = _csvReader.GetRelationshipInformation().TryGetValue(bookingId.ToString(), out var flightNumbers);
+        var hasFlights = _reader.GetRelationshipInformation().TryGetValue(bookingId.ToString(), out var flightNumbers);
         if (!hasFlights)
         {
             throw new InvalidAttributeException("Flights", "List of Flights", ["Required", "Departure < Arrival"]);
@@ -80,8 +80,8 @@ public class BookingRepository : IFileRepository<int, Booking>
         booking.ReservationNumber = _reservationNumber;
         _validator.Validate(booking);
         _reservationNumber++;
-        _csvReader.WriteEntityInformation(_bookingCsvSerializer.ToCsv(booking));
-        _csvReader.WriteRelationshipInformation(booking.ReservationNumber.ToString(),
+        _reader.WriteEntityInformation(_serializer.ToCsv(booking));
+        _reader.WriteRelationshipInformation(booking.ReservationNumber.ToString(),
             booking.Flights.Select(f => f.Number).ToList());
         _bookings.Add(booking);
         return booking;
@@ -93,7 +93,7 @@ public class BookingRepository : IFileRepository<int, Booking>
         {
             throw new EntityNotFound<Booking, int>(reservationNumber);
         }
-        _csvReader.UpdateEntityInformation(reservationNumber.ToString(), _bookingCsvSerializer.ToCsv(booking));
+        _reader.UpdateEntityInformation(reservationNumber.ToString(), _serializer.ToCsv(booking));
         _bookings = _bookings.Select(b => b.ReservationNumber == reservationNumber ? booking : b).ToList();
         return booking;
     }
@@ -104,7 +104,7 @@ public class BookingRepository : IFileRepository<int, Booking>
         {
             throw new EntityNotFound<Booking, int>(reservationNumber);
         }
-        _csvReader.DeleteEntityInformation(reservationNumber.ToString(), true);
+        _reader.DeleteEntityInformation(reservationNumber.ToString(), true);
         _bookings = _bookings.Where(b => b.ReservationNumber != reservationNumber).ToList();
     }
 }

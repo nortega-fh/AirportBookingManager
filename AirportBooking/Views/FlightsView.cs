@@ -1,5 +1,5 @@
 ﻿using AirportBooking.Enums;
-using AirportBooking.Helpers;
+using AirportBooking.DTOs;
 using AirportBooking.Models;
 
 namespace AirportBooking

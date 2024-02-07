@@ -1,4 +1,4 @@
-﻿namespace AirportBooking;
+﻿namespace AirportBooking.Repositories;
 
 public interface IFileRepository<Key, Value> where Key : IComparable<Key>
 {

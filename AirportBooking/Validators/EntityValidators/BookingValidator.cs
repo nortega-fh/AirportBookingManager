@@ -1,7 +1,7 @@
 ﻿using AirportBooking.Enums;
 using AirportBooking.Models;
 
-namespace AirportBooking.Validators;
+namespace AirportBooking.Validators.EntityValidators;
 
 public class BookingValidator : IValidator<Booking>
 {
