@@ -9,7 +9,5 @@ public class User
 
     public UserRole Role { get; set; }
 
-    public string ToCSV() => string.Join(",", [Username, Password, Role.ToString()]);
-
     public override string ToString() => Username;
 }

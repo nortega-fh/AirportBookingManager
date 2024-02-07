@@ -1,69 +1,87 @@
-﻿using AirportBooking.Enums;
-using AirportBooking.Exceptions;
+﻿using AirportBooking.Exceptions;
 using AirportBooking.FileReaders;
 using AirportBooking.Models;
+using AirportBooking.Serializers;
+using AirportBooking.Validators;
 using System.Collections.Immutable;
 
 namespace AirportBooking.Repositories;
 
 public class UserRepository : IFileRepository<string, User>
 {
-    private readonly List<User> userList = [];
-    private readonly CSVReader userCSVReader;
+    private List<User> _users = [];
+    private readonly CSVReader _csvReader;
+    private readonly ICSVSerializer<User> _serializer;
+    private readonly IValidator<User> _validator;
 
-    public UserRepository()
+    public UserRepository(ICSVSerializer<User> csvSerializer, IValidator<User> validator)
     {
-        userCSVReader = new("users");
-        LoadUsers();
-    }
-
-    private void AddUserFromCSVLine(string line)
-    {
-        var data = line.Split(',');
-        (string username, string password, string role) = (data[0].Trim(), data[1].Trim(), data[2].Trim());
-        userList.Add(new User { Username = username, Password = password, Role = Enum.Parse<UserRole>(role, true) });
+        _validator = validator;
+        _serializer = csvSerializer;
+        _csvReader = new("users");
+        try
+        {
+            LoadUsers();
+        }
+        catch (Exception ex) when (ex is InvalidAttributeException or EntitySerializationException<User>)
+        {
+            _users.Clear();
+            Console.WriteLine("Couldn't load users");
+            Console.WriteLine(ex.Message);
+        }
     }
 
     private void LoadUsers()
     {
-        var readUsers = userCSVReader.ReadEntityInformation().ToList();
-        readUsers.ForEach(AddUserFromCSVLine);
+        var readUsers = _csvReader.ReadEntityInformation().ToList();
+        readUsers.ForEach(line => _users.Add(_serializer.FromCsv(line)));
     }
 
     public IReadOnlyList<User> FindAll()
     {
-        return userList.ToImmutableList();
+        return _users.ToImmutableList();
     }
 
     public User? Find(string username)
     {
-        return userList.Find(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
+        return _users.Find(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
     }
 
     public User Login(string username, string password)
     {
-        var user = userList.Find(user => user.Username.Equals(username, StringComparison.OrdinalIgnoreCase) && user.Password.Equals(password, StringComparison.OrdinalIgnoreCase));
+        var user = _users.Find(user => user.Username.Equals(username, StringComparison.OrdinalIgnoreCase)
+        && user.Password.Equals(password, StringComparison.OrdinalIgnoreCase));
         return user is null ? throw new EntityNotFound<User, string>(username) : user;
     }
 
     public User Save(User user)
     {
-        var existingUser = userList.Find(u => u.Username.Equals(user.Username, StringComparison.OrdinalIgnoreCase));
+        var existingUser = _users.Find(u => u.Username.Equals(user.Username, StringComparison.OrdinalIgnoreCase));
         if (existingUser is not null)
         {
             throw new EntityAlreadyExists<User, string>(user.Username);
         }
-        userCSVReader.WriteEntityInformation(user.ToCSV());
+        _validator.Validate(user);
+        _csvReader.WriteEntityInformation(_serializer.ToCsv(user));
+        _users.Add(user);
         return user;
     }
 
-    public User? Update(string username, User value)
+    public User? Update(string username, User user)
     {
-        throw new NotImplementedException();
+        var existingUser = _users.Find(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase))
+            ?? throw new EntityNotFound<User, string>(username); ;
+        _validator.Validate(user);
+        _csvReader.UpdateEntityInformation(username, _serializer.ToCsv(user));
+        _users = _users.Select(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase) ? user : u).ToList();
+        return user;
     }
 
     public void Delete(string username)
     {
-        throw new NotImplementedException();
+        var existingUser = _users.Find(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase))
+            ?? throw new EntityNotFound<User, string>(username);
+        _csvReader.DeleteEntityInformation(username);
+        _users.Remove(existingUser);
     }
 }

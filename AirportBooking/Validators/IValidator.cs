@@ -1,6 +1,6 @@
 ﻿namespace AirportBooking.Validators;
 
-public interface IValidator
+public interface IValidator<T>
 {
-    public void Validate<T>(T value);
+    public void Validate(T value);
 }

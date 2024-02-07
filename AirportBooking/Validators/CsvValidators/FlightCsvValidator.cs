@@ -3,10 +3,10 @@ using AirportBooking.Models;
 
 namespace AirportBooking.Validators.CsvValidators;
 
-public class FlightCsvValidator : IValidator<string>
+public class FlightCsvValidator : ICsvValidator
 {
     const int minLineLength = 8;
-    public void Validate(string csvLine)
+    public string[] Validate(string csvLine)
     {
         var data = csvLine.Split(",");
         var error = new EntitySerializationException<Flight>($"The data for the flight is incomplete");
@@ -37,6 +37,7 @@ public class FlightCsvValidator : IValidator<string>
         {
             throw error;
         }
+        return data;
     }
     private static IEnumerable<string> GetFlightPrices(string[] data)
     {
@@ -49,12 +50,17 @@ public class FlightCsvValidator : IValidator<string>
             throw new EntitySerializationException<Flight>($"There is no price data");
         foreach (var price in prices)
         {
-            var amount = price.Split(":")[1].Replace(".", ",");
-            if (!float.TryParse(amount, out float value))
-            {
-                throw new EntitySerializationException<Flight>($"Value for price is in incorrect format, " +
-                    $"decimal value should be after a dot (.)");
-            }
+            ValidatePrice(price);
+        }
+    }
+
+    private static void ValidatePrice(string price)
+    {
+        var amount = price.Split(":")[1].Replace(".", ",");
+        if (!float.TryParse(amount, out float _))
+        {
+            throw new EntitySerializationException<Flight>($"Value for price is in incorrect format, " +
+                $"decimal value should be after a dot (.)");
         }
     }
 

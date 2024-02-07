@@ -11,8 +11,7 @@ public class FlightCsvSerializer : ICSVSerializer<Flight>
     private readonly FlightValidator _entityValidator = new();
     public Flight FromCsv(string csvLine)
     {
-        _csvValidator.Validate(csvLine);
-        var data = csvLine.Split(',');
+        var data = _csvValidator.Validate(csvLine);
         var flightPrices = GetFlightPrices(data);
         var flightNumber = data[0];
         var totalFlightPrices = flightPrices.Count;
