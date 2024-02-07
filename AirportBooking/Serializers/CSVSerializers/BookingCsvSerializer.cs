@@ -24,7 +24,7 @@ public class BookingCsvSerializer : ICSVSerializer<Booking>
             FlightClasses = flightClasses,
             BookingType = bookingType,
             MainPassenger = new User { Username = username }
-        }; ;
+        };
     }
 
     private static void ValidateCsvLine(string csvLine)
