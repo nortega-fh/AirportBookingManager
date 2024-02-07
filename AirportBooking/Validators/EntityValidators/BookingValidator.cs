@@ -1,4 +1,5 @@
 ﻿using AirportBooking.Enums;
+using AirportBooking.Exceptions;
 using AirportBooking.Models;
 
 namespace AirportBooking.Validators.EntityValidators;

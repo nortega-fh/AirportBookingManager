@@ -1,17 +1,15 @@
 ﻿using AirportBooking.Enums;
 
-namespace AirportBooking.Models
+namespace AirportBooking.Models;
+
+public class User
 {
-    public class User
-    {
-        public string Username { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
+    public string Username { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
 
-        public UserRole Role { get; set; }
+    public UserRole Role { get; set; }
 
-        public string ToCSV() => string.Join(",", [Username, Password, Role.ToString()]);
+    public string ToCSV() => string.Join(",", [Username, Password, Role.ToString()]);
 
-        public override string ToString() => Username;
-
-    }
+    public override string ToString() => Username;
 }
