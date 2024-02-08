@@ -1,10 +1,8 @@
 ﻿namespace AirportBooking.Views;
 
-public interface IVIew<T>
+public interface IView<T>
 {
     void ShowAll();
     void ShowOne();
-    void Create();
-    void Update();
     void Delete();
 }

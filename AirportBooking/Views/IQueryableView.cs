@@ -1,6 +1,7 @@
 ﻿namespace AirportBooking.Views;
 
-public interface IQueryableView<T, K> : IVIew<T>
+public interface IQueryableView<T, K> : IView<T>
 {
-    void SearchByParameters(K parameterDTO);
+    T? SearchByParameters(K parameterDTO);
+    K ObtainParameters();
 }

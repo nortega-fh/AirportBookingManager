@@ -5,7 +5,7 @@ using AirportBooking.Serializers;
 using AirportBooking.Validators;
 using System.Collections.Immutable;
 
-namespace AirportBooking.Repositories;
+namespace AirportBooking.Repositories.CsvRepositories;
 
 public class UserRepository : IUserRepository
 {

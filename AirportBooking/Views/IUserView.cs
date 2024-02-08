@@ -2,7 +2,7 @@
 
 namespace AirportBooking.Views;
 
-public interface IUserView : IVIew<User>
+public interface IUserView : IView<User>
 {
     User? Login();
     User? Register();

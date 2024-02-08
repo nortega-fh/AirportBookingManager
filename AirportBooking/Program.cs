@@ -3,7 +3,7 @@ using AirportBooking.Repositories;
 using AirportBooking.Serializers.ConsoleSerializers;
 using AirportBooking.Serializers.CSVSerializers;
 using AirportBooking.Validators.EntityValidators;
-using AirportBooking.Views;
+using AirportBooking.Views.ConsoleViews;
 
 var userValidator = new UserValidator();
 var userCsvSerializer = new UserCsvSerializer(userValidator);

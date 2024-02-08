@@ -1,10 +1,9 @@
 ﻿using AirportBooking.Enums;
 using AirportBooking.Exceptions;
 using AirportBooking.Models;
-using AirportBooking.Repositories;
-using AirportBooking.Views.ModelViews;
+using AirportBooking.Repositories.CsvRepositories;
 
-namespace AirportBooking.Views;
+namespace AirportBooking.Views.ConsoleViews;
 
 public class MainView(UserView userView, FlightsView flightView, BookingRepository repository)
 {

@@ -4,7 +4,7 @@ using AirportBooking.Models;
 using AirportBooking.Serializers.CSVSerializers;
 using AirportBooking.Validators.EntityValidators;
 
-namespace AirportBooking.Repositories;
+namespace AirportBooking.Repositories.CsvRepositories;
 
 public class BookingRepository : IFileRepository<int, Booking>
 {

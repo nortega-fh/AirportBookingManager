@@ -1,7 +1,7 @@
 ﻿using AirportBooking.DTOs;
 using AirportBooking.Models;
 
-namespace AirportBooking.Views.ModelViews;
+namespace AirportBooking.Views.ConsoleViews;
 
 public class BookingsView : IQueryableView<Booking, BookingParameters>
 {

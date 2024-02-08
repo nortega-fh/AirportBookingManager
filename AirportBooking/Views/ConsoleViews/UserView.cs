@@ -4,9 +4,9 @@ using AirportBooking.Models;
 using AirportBooking.Repositories;
 using AirportBooking.Serializers;
 
-namespace AirportBooking.Views.ModelViews;
+namespace AirportBooking.Views.ConsoleViews;
 
-public class UserView : ViewInputHandler, IUserView
+public class UserView : ConsoleViewBase, IUserView
 {
     private readonly IUserRepository _userRepository;
     private readonly IConsoleSerializer<User> _serializer;
@@ -44,14 +44,25 @@ public class UserView : ViewInputHandler, IUserView
         }
     }
 
-    public void Create()
+    public User? Login()
     {
-        CreateUser(UserRole.Passenger);
-    }
-
-    public void Create(UserRole role)
-    {
-        CreateUser(role);
+        Console.WriteLine("Login user");
+        var username = GetValue(requestUsernameMessage);
+        var password = GetValue(requestPasswordMessage);
+        User? foundUser = null;
+        try
+        {
+            foundUser = _userRepository.Login(username, password);
+        }
+        catch (Exception ex) when (ex is EntityNotFound<User, string>)
+        {
+            Console.WriteLine(ex.Message);
+        }
+        finally
+        {
+            ClearOnInput();
+        }
+        return foundUser;
     }
 
     public User? Register()
@@ -113,26 +124,5 @@ public class UserView : ViewInputHandler, IUserView
         {
             ClearOnInput();
         }
-    }
-
-    public User? Login()
-    {
-        Console.WriteLine("Login user");
-        var username = GetValue(requestUsernameMessage);
-        var password = GetValue(requestPasswordMessage);
-        User? foundUser = null;
-        try
-        {
-            foundUser = _userRepository.Login(username, password);
-        }
-        catch (Exception ex) when (ex is EntityNotFound<User, string>)
-        {
-            Console.WriteLine(ex.Message);
-        }
-        finally
-        {
-            ClearOnInput();
-        }
-        return foundUser;
     }
 }

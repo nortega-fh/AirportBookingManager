@@ -6,9 +6,9 @@ using AirportBooking.Serializers.CSVSerializers;
 using AirportBooking.Validators.EntityValidators;
 using System.Collections.Immutable;
 
-namespace AirportBooking.Repositories;
+namespace AirportBooking.Repositories.CsvRepositories;
 
-public class FlightRepository : IFileRepository<string, Flight>
+public class FlightRepository : IFileQueryableRepository<string, Flight, FlightSearchParameters>
 {
     private List<Flight> _flights = [];
     private readonly CSVReader _reader = new("flights");
@@ -48,12 +48,12 @@ public class FlightRepository : IFileRepository<string, Flight>
             .Where(f => parameters.DepartureDate <= f.DepartureDate && f.DepartureDate < parameters.DepartureDate.AddDays(1)
             && f.DepartureDate > parameters.DepartureDate.AddDays(-1))
             .Where(f => f.ClassPrices.Values.Min() >= parameters.MinPrice && f.ClassPrices.Values.Min() <= parameters.MaxPrice);
-        if (parameters.DepartureAirport is (not null) and (not ""))
+        if (parameters.DepartureAirport is not null and not "")
         {
             resultFlights = resultFlights.Where(f => f.OriginAirport.Equals(parameters.DepartureAirport,
                 StringComparison.OrdinalIgnoreCase));
         }
-        if (parameters.ArrivalAirport is (not null) and (not ""))
+        if (parameters.ArrivalAirport is not null and not "")
         {
             resultFlights = resultFlights.Where(f => f.DestinationAirport.Equals(parameters.ArrivalAirport,
                 StringComparison.OrdinalIgnoreCase));
