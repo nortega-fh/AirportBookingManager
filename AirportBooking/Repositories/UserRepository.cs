@@ -72,6 +72,7 @@ public class UserRepository : IUserRepository
     {
         var existingUser = _users.Find(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase))
             ?? throw new EntityNotFound<User, string>(username); ;
+        user.Role = existingUser.Role;
         _validator.Validate(user);
         _csvReader.UpdateEntityInformation(username, _serializer.ToCsv(user));
         _users = _users.Select(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase) ? user : u).ToList();

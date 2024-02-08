@@ -1,13 +1,22 @@
 ﻿using AirportBooking.DTOs;
 using AirportBooking.Enums;
+using AirportBooking.Exceptions;
 using AirportBooking.Models;
 using AirportBooking.Repositories;
+using AirportBooking.Serializers;
 
-namespace AirportBooking;
+namespace AirportBooking.Views.ModelViews;
 
-public class FlightsView(FlightRepository repository)
+public class FlightsView : ViewInputHandler, IQueryableView<Flight, FlightSearchParameters>
 {
-    private readonly FlightRepository repository = repository;
+    private readonly IFileRepository<string, Flight> _repository;
+    private readonly IFlightConsoleSerializer _serializer;
+
+    public FlightsView(IFileRepository<string, Flight> repository, IFlightConsoleSerializer serializer)
+    {
+        _repository = repository;
+        _serializer = serializer;
+    }
 
     public FlightSearchParameters GetFlightFilters(BookingType bookingType = BookingType.OneWay)
     {
@@ -128,5 +137,60 @@ public class FlightsView(FlightRepository repository)
         Console.Clear();
         var flights = parameters is null ? repository.FindAll() : repository.FindBySearchParameters(parameters);
         flights.ToList().ForEach(Console.WriteLine);
+    }
+
+    public void SearchByParameters(FlightSearchParameters parameters)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void ShowAll()
+    {
+        foreach (var flight in _repository.FindAll())
+            _serializer.PrintToConsole(flight);
+    }
+
+    public void ShowOne()
+    {
+        var flightNumber = GetValue("Please indicate the flight's number:");
+        try
+        {
+            _repository.Find(flightNumber);
+        }
+        catch (Exception ex) when (ex is EntityNotFound<Flight, string>)
+        {
+            Console.WriteLine(ex.Message);
+        }
+        finally
+        {
+            ClearOnInput();
+        }
+    }
+
+    public void Create()
+    {
+
+    }
+
+    public void Update()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Delete()
+    {
+        var flightNumber = GetValue("Please indicate the flight number to delete:");
+        try
+        {
+            _repository.Delete(flightNumber);
+        }
+        catch (Exception ex) when (ex is EntityNotFound<Flight, string>)
+        {
+            Console.WriteLine(ex.Message);
+        }
+        finally
+        {
+            ClearOnInput();
+        }
     }
 }
