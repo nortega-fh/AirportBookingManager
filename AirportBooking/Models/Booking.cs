@@ -19,22 +19,4 @@ public class Booking
         }
         return price;
     }
-
-    public override string ToString()
-    {
-        return $"""
-                ######################################
-                         Booking {ReservationNumber}
-                ######################################
-                Flights:
-                {string.Join("\n", Flights)}
-                Booking type: {BookingType}
-                Class: {string.Join(",", FlightClasses)}
-                Passenger:
-                {MainPassenger}
-                --------------------------------------
-                    Total price: ${CalculatePrice()}
-                --------------------------------------
-                """;
-    }
 }

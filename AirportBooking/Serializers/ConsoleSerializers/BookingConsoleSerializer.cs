@@ -4,13 +4,20 @@ namespace AirportBooking.Serializers.ConsoleSerializers;
 
 public class BookingConsoleSerializer : IConsoleSerializer<Booking>
 {
-    public Booking GetFromInputs()
-    {
-        throw new NotImplementedException();
-    }
-
     public void PrintToConsole(Booking booking)
     {
-        throw new NotImplementedException();
+        Console.WriteLine($""""
+            ######################################
+              Reservation number: {booking.ReservationNumber}
+            ######################################
+            Flights: {string.Join(",", [.. booking.Flights.Select(f => f.Number)])}
+            Booking type: {booking.BookingType}
+            Class: {string.Join(",", booking.FlightClasses)}
+            Passenger:
+            {booking.MainPassenger}
+            --------------------------------------
+               Total price: {string.Format("{0:C}", booking.CalculatePrice())}
+            --------------------------------------
+            """");
     }
 }

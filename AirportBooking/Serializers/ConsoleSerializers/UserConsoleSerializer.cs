@@ -4,13 +4,8 @@ namespace AirportBooking.Serializers.ConsoleSerializers;
 
 public class UserConsoleSerializer : IConsoleSerializer<User>
 {
-    public User GetFromInputs()
+    public void PrintToConsole(User user)
     {
-        throw new NotImplementedException();
-    }
-
-    public void PrintToConsole(User entity)
-    {
-        throw new NotImplementedException();
+        Console.WriteLine($"User: {user.Username}");
     }
 }

@@ -7,7 +7,7 @@ using System.Collections.Immutable;
 
 namespace AirportBooking.Repositories;
 
-public class UserRepository : IFileRepository<string, User>
+public class UserRepository : IUserRepository
 {
     private List<User> _users = [];
     private readonly CSVReader _csvReader;
@@ -42,9 +42,10 @@ public class UserRepository : IFileRepository<string, User>
         return _users.ToImmutableList();
     }
 
-    public User? Find(string username)
+    public User Find(string username)
     {
-        return _users.Find(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
+        return _users.Find(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase))
+            ?? throw new EntityNotFound<User, string>(username);
     }
 
     public User Login(string username, string password)
@@ -67,7 +68,7 @@ public class UserRepository : IFileRepository<string, User>
         return user;
     }
 
-    public User? Update(string username, User user)
+    public User Update(string username, User user)
     {
         var existingUser = _users.Find(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase))
             ?? throw new EntityNotFound<User, string>(username); ;

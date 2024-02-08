@@ -34,9 +34,10 @@ public class FlightRepository : IFileRepository<string, Flight>
         readFlights.ForEach(line => _flights.Add(_serializer.FromCsv(line)));
     }
 
-    public Flight? Find(string flightNumber)
+    public Flight Find(string flightNumber)
     {
-        return _flights.Find(f => f.Number.Equals(flightNumber, StringComparison.OrdinalIgnoreCase));
+        return _flights.Find(f => f.Number.Equals(flightNumber, StringComparison.OrdinalIgnoreCase))
+            ?? throw new EntityNotFound<Flight, string>(flightNumber);
     }
 
     public IReadOnlyList<Flight> FindBySearchParameters(FlightSearchParameters parameters)
@@ -82,7 +83,7 @@ public class FlightRepository : IFileRepository<string, Flight>
         return flight;
     }
 
-    public Flight? Update(string flightNumber, Flight newFlight)
+    public Flight Update(string flightNumber, Flight newFlight)
     {
         if (_flights.Find(f => f.Number.Equals(flightNumber, StringComparison.OrdinalIgnoreCase)) is null)
         {

@@ -65,9 +65,10 @@ public class BookingRepository : IFileRepository<int, Booking>
         return _userRepository.Find(username) ?? throw new EntityNotFound<User, string>(username);
     }
 
-    public Booking? Find(int rerservationNumber)
+    public Booking Find(int rerservationNumber)
     {
-        return _bookings.Find(b => b.ReservationNumber == rerservationNumber);
+        return _bookings.Find(b => b.ReservationNumber == rerservationNumber)
+            ?? throw new EntityNotFound<Booking, int>(rerservationNumber);
     }
 
     public IReadOnlyList<Booking> FindAll()
@@ -87,7 +88,7 @@ public class BookingRepository : IFileRepository<int, Booking>
         return booking;
     }
 
-    public Booking? Update(int reservationNumber, Booking booking)
+    public Booking Update(int reservationNumber, Booking booking)
     {
         if (_bookings.Find(b => b.ReservationNumber == reservationNumber) is null)
         {
