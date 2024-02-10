@@ -16,7 +16,8 @@ public class BookingRepository : IFileRepository<int, Booking>
     private readonly IFileRepository<string, User> _userRepository;
     private readonly IFileRepository<string, Flight> _flightRepository;
 
-    public BookingRepository(IFileRepository<string, User> userRepository, IFileRepository<string, Flight> flightRepository)
+    public BookingRepository(IFileRepository<string, User> userRepository,
+        IFileRepository<string, Flight> flightRepository)
     {
         _userRepository = userRepository;
         _flightRepository = flightRepository;
@@ -29,6 +30,7 @@ public class BookingRepository : IFileRepository<int, Booking>
             _bookings.Clear();
             Console.WriteLine("Couldn't load booking information due to incorrect data:");
             Console.WriteLine(e.Message);
+            throw;
         }
     }
 

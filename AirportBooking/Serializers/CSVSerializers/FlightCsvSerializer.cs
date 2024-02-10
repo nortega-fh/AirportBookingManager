@@ -35,7 +35,7 @@ public class FlightCsvSerializer : ICSVSerializer<Flight>
 
     private static SortedDictionary<FlightClass, float> GetFlightPrices(string[] data)
     {
-        var flightPricesData = data.TakeWhile(data => data.Split(":").Length == 2).ToList();
+        var flightPricesData = data.Where(data => data.Split(":").Length == 2).ToList();
         var flightPrices = new SortedDictionary<FlightClass, float>();
         flightPricesData.ForEach(price => flightPrices.Add(Enum.Parse<FlightClass>(price.Split(":")[0], true),
                float.Parse(price.Split(":")[1])));

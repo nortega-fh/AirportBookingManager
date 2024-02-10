@@ -16,8 +16,8 @@ public class FlightCsvValidator : ICsvValidator
         }
         var flightPricesInformation = GetFlightPrices(data);
         ValidatePricingInformation([.. flightPricesInformation]);
-        var totalPricesForFlight = flightPricesInformation.Count();
-        if (data.Length < minLineLength + totalPricesForFlight)
+        var totalPricesForFlight = flightPricesInformation.Length;
+        if (data.Length < minLineLength + totalPricesForFlight - 1)
         {
             throw error;
         }
@@ -39,9 +39,9 @@ public class FlightCsvValidator : ICsvValidator
         }
         return data;
     }
-    private static IEnumerable<string> GetFlightPrices(string[] data)
+    private static string[] GetFlightPrices(string[] data)
     {
-        return data.TakeWhile(pricePair => pricePair.Split(":").Length == 2);
+        return data.Where(pricePair => pricePair.Split(":").Length == 2).ToArray();
     }
 
     private static void ValidatePricingInformation(string[] prices)
@@ -66,7 +66,7 @@ public class FlightCsvValidator : ICsvValidator
 
     private static bool IsDateTimeInvalid(string? value)
     {
-        return DateTime.TryParse(value, out var _);
+        return !DateTime.TryParse(value, out var _);
     }
 
     private static bool IsStringInvalid(string? value)

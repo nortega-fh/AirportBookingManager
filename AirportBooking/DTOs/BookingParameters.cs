@@ -1,5 +1,7 @@
-﻿namespace AirportBooking.DTOs;
+﻿using AirportBooking.Enums;
 
-public record BookingParameters
-{
-}
+namespace AirportBooking.DTOs;
+
+public record BookingParameters(string? FlightNumber, float? MinPrice, float? MaxPrice, string? DepartureCountry,
+    string? DestinationCountry, DateTime? DepartureDate, string? DepartureAirport, string? ArrivalAirport,
+    string? Passenger, FlightClass? FlightClass, BookingType? BookingType);

@@ -14,12 +14,11 @@ public class BookingValidator : IValidator<Booking>
         {
             throw new InvalidAttributeException("Reservation Number", "Integer", ["Required", "Value > 0"]);
         }
-        if (booking.Flights.Count < 1 || booking.Flights.Last().DepartureDate > booking.Flights.First().DepartureDate)
+        if (booking.Flights.Count < 1 || booking.Flights.Last().DepartureDate < booking.Flights.First().DepartureDate)
         {
             throw new InvalidAttributeException("Flights", "List Flights", ["Required", "Arrival > Departure"]);
         }
-        bool isInvalidBookingType = !booking.BookingType.ToString().Equals(BookingType.OneWay.ToString())
-            || !booking.BookingType.ToString().Equals(BookingType.RoundTrip.ToString());
+        bool isInvalidBookingType = booking.BookingType < BookingType.OneWay || booking.BookingType > BookingType.RoundTrip;
         if (isInvalidBookingType)
         {
             throw new InvalidAttributeException("Booking Type", "Booking Type", ["Required",

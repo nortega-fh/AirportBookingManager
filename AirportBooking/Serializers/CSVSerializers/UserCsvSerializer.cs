@@ -17,7 +17,7 @@ public class UserCsvSerializer : ICSVSerializer<User>
     public User FromCsv(string csvLine)
     {
         var data = _csvValidator.Validate(csvLine);
-        var (username, password, role) = (data[0], data[1], Enum.Parse<UserRole>(data[3], true));
+        var (username, password, role) = (data[0], data[1], Enum.Parse<UserRole>(data[2], true));
         return new User
         {
             Username = username,

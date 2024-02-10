@@ -1,72 +1,63 @@
 ﻿using AirportBooking.DTOs;
 using AirportBooking.Enums;
 using AirportBooking.Exceptions;
+using AirportBooking.Filters;
 using AirportBooking.Models;
 using AirportBooking.Repositories;
 using AirportBooking.Serializers;
 
-namespace AirportBooking.Views.ConsoleViews;
+namespace AirportBooking.Views.Controllers;
 
-public class FlightsView : ConsoleViewBase, IQueryableView<Flight, FlightSearchParameters>
+public class FlightsController : ConsoleViewBase
 {
-    private readonly IFileQueryableRepository<string, Flight, FlightSearchParameters> _repository;
+    private readonly IFileRepository<string, Flight> _repository;
+    private readonly IFilter<Flight, FlightSearchParameters> _filter;
     private readonly IFlightConsoleSerializer _serializer;
 
-    public FlightsView(IFileQueryableRepository<string, Flight, FlightSearchParameters> repository,
-        IFlightConsoleSerializer serializer)
+    public FlightsController(IFileRepository<string, Flight> repository, IFlightConsoleSerializer serializer,
+        IFilter<Flight, FlightSearchParameters> filter)
     {
         _repository = repository;
         _serializer = serializer;
+        _filter = filter;
     }
 
-    public Flight? SearchByParameters(FlightSearchParameters parameters)
+    public IReadOnlyList<Flight>? SearchByParameters(FlightSearchParameters parameters)
     {
-        var resultFlights = _repository.FindBySearchParameters(parameters);
+        var resultFlights = _filter.SearchByParameters(parameters, _repository.FindAll().ToList());
         if (resultFlights.Count == 0)
         {
-            Console.WriteLine("No results match your query parameters");
             return null;
         }
-        foreach (var flight in resultFlights)
-        {
-            _serializer.PrintToConsole(flight);
-        }
-        var flightNumberList = resultFlights.Select(f => f.Number).ToList();
-        return resultFlights.Where(f => f.Number.Equals(GetValue("Please select one of the flights in the list",
-            flightNumberList))).First();
+        return resultFlights;
     }
 
-    public void ShowAll()
+    public IReadOnlyList<Flight> FindAll()
     {
-        foreach (var flight in _repository.FindAll())
-            _serializer.PrintToConsole(flight);
+        return _repository.FindAll();
     }
 
-    public void ShowOne()
+    public Flight? Find(string flightNumber)
     {
-        var flightNumber = GetValue("Please indicate the flight's number:");
         try
         {
-            _repository.Find(flightNumber);
+            return _repository.Find(flightNumber);
         }
         catch (Exception ex) when (ex is EntityNotFound<Flight, string>)
         {
             Console.WriteLine(ex.Message);
         }
-        finally
-        {
-            ClearOnInput();
-        }
+        return null;
     }
 
-    public FlightSearchParameters ObtainParameters()
+    public FlightSearchParameters ObtainFilterParameters()
     {
         var originCountry = GetValue("Please indicate the origin country");
-        var destinationCountry = GetValue("Please indicate the origin country");
+        var destinationCountry = GetValue("Please indicate the arrival country");
         var departureDate = DateTime.Parse(GetValue("Please indicate the flight's departure date as YYYY-MM-DD"));
         var departureAirport = GetOptionalValue("(Optional) Please indicate the flight's departure airport");
         var arrivalAirport = GetOptionalValue("(Optional) Please indicate the flight's arrival airport");
-        FlightClass? flightClass = GetOptionalValue("(Optional) Please indicate the preferred class for the flight",
+        FlightClass? flightClass = GetOptionalValue("(Optional) Please indicate the class the flight must include",
             [FlightClass.Economy, FlightClass.Business, FlightClass.FirstClass], out var obtainedClass)
             ? obtainedClass : null;
         var minPrice = GetOptionalFloatValue("(Optional) Please indicate the minimum value to look for");
@@ -83,9 +74,8 @@ public class FlightsView : ConsoleViewBase, IQueryableView<Flight, FlightSearchP
             );
     }
 
-    public void Delete()
+    public void Delete(string flightNumber)
     {
-        var flightNumber = GetValue("Please indicate the flight number to delete:");
         try
         {
             _repository.Delete(flightNumber);
@@ -94,9 +84,10 @@ public class FlightsView : ConsoleViewBase, IQueryableView<Flight, FlightSearchP
         {
             Console.WriteLine(ex.Message);
         }
-        finally
-        {
-            ClearOnInput();
-        }
+    }
+
+    public void PrintToConsole(Flight flight)
+    {
+        _serializer.PrintToConsole(flight);
     }
 }

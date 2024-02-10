@@ -28,6 +28,7 @@ public class UserRepository : IUserRepository
             _users.Clear();
             Console.WriteLine("Couldn't load users");
             Console.WriteLine(ex.Message);
+            throw;
         }
     }
 
@@ -52,7 +53,7 @@ public class UserRepository : IUserRepository
     {
         var user = _users.Find(user => user.Username.Equals(username, StringComparison.OrdinalIgnoreCase)
         && user.Password.Equals(password, StringComparison.OrdinalIgnoreCase));
-        return user is null ? throw new EntityNotFound<User, string>(username) : user;
+        return user ?? throw new EntityNotFound<User, string>(username);
     }
 
     public User Save(User user)

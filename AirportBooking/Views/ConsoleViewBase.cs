@@ -1,4 +1,4 @@
-﻿namespace AirportBooking.Views.ConsoleViews;
+﻿namespace AirportBooking.Views;
 
 public abstract class ConsoleViewBase
 {
@@ -55,7 +55,6 @@ public abstract class ConsoleViewBase
 
     private static void PrintOptions<T>(IList<T> options)
     {
-        Console.WriteLine("Please choose one of the following options:");
         for (var i = 0; i < options.Count; i++)
             Console.WriteLine($"{i + 1}. {options[i]}");
     }
