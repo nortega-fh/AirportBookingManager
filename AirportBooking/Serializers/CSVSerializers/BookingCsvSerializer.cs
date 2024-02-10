@@ -19,12 +19,14 @@ public class BookingCsvSerializer : ICSVSerializer<Booking>
             flightClasses.Add(Enum.Parse<FlightClass>(data[3]));
         }
         var username = flightClasses.Count > 1 ? data[4] : data[3];
+        var bookingStatus = Enum.Parse<BookingStatus>(data[^1], true);
         return new Booking
         {
             ReservationNumber = reservationNumber,
             FlightClasses = flightClasses,
             BookingType = bookingType,
-            MainPassenger = new User { Username = username }
+            MainPassenger = new User { Username = username },
+            Status = bookingStatus
         };
     }
 
