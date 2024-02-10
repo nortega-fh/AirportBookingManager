@@ -105,7 +105,31 @@ public class PassengerView : RoleConsoleView
 
     private void CancelBooking()
     {
-        throw new NotImplementedException();
+        try
+        {
+            var bookings = ShowUserBookings();
+            if (bookings is null || bookings.Count < 1)
+            {
+                Console.WriteLine("There are no bookings for this user");
+                return;
+            }
+            var selectedBookingReservationNumber = GetValue("Please select the booking to cancel",
+                [.. bookings.Select(b => b.ReservationNumber)]);
+            var booking = _bookingController.Find(selectedBookingReservationNumber)!;
+            if (booking.Flights.First().DepartureDate < DateTime.Now)
+            {
+                Console.WriteLine("Can't cancel a booking that already started");
+                return;
+            }
+            var confirmation = GetValue("Are you sure you want to cancel this booking?", ["Yes", "No"]);
+            if (confirmation.Equals("No")) return;
+            booking.Status = BookingStatus.Canceled;
+            _bookingController.Update(selectedBookingReservationNumber, booking);
+        }
+        catch (Exception ex) when (ex is EntityNotFound<Booking, int>)
+        {
+            Console.WriteLine(ex.Message);
+        }
     }
 
     private void ModifyBooking()
