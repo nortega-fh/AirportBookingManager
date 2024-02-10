@@ -73,8 +73,10 @@ public class BookingsController : ConsoleViewBase
         FlightClass? flightClass = GetOptionalValue("(Optional) Please indicate the booking's flight class to look for",
                     [FlightClass.Economy, FlightClass.Business, FlightClass.FirstClass], out var resultClass)
             ? resultClass : null;
-        BookingType? bookingType = GetOptionalValue("(Optional) Please indicate the booking's type to look for", [BookingType.OneWay,
-            BookingType.RoundTrip], out var resultType) ? resultType : null;
+        BookingType? bookingType = GetOptionalValue("(Optional) Please indicate the booking's type to look for",
+            [BookingType.OneWay, BookingType.RoundTrip], out var resultType) ? resultType : null;
+        BookingStatus? bookingStatus = GetOptionalValue("(Optional) Please indicate the booking's status to look for",
+            [BookingStatus.Confirmed, BookingStatus.Canceled], out var statusType) ? statusType : null;
         return new BookingParameters(
                 flightNumber,
                 minPrice,
@@ -86,7 +88,8 @@ public class BookingsController : ConsoleViewBase
                 arrivalAirport,
                 passenger,
                 flightClass,
-                bookingType
+                bookingType,
+                bookingStatus
             );
     }
 

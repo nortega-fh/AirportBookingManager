@@ -1,5 +1,5 @@
-ReservationNumber,BookingType,FirstFlightClass,(Optional)SecondFlightClass,Passenger
-1,RoundTrip,Economy,Business,passenger
-2,OneWay,Business,passenger
-3,RoundTrip,Economy,Business,passenger
-4,RoundTrip,Business,Business,passenger
+ReservationNumber,BookingType,FirstFlightClass,(Optional)SecondFlightClass,Passenger,Status
+1,RoundTrip,Economy,Business,passenger,Confirmed
+2,OneWay,Business,passenger,Canceled
+3,RoundTrip,Economy,Business,passenger,Confirmed
+4,RoundTrip,Business,Business,passenger,Confirmed

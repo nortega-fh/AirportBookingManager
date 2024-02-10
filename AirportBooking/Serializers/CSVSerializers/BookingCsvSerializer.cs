@@ -31,9 +31,12 @@ public class BookingCsvSerializer : ICSVSerializer<Booking>
     public string ToCsv(Booking booking)
     {
         if (booking.MainPassenger is null) throw new EntitySerializationException<Booking>("Booking passenger can't be null");
-        return string.Join(",", [booking.ReservationNumber,
+        return string.Join(",", [
+            booking.ReservationNumber,
             booking.BookingType,
             .. booking.FlightClasses,
-            booking.MainPassenger.Username]);
+            booking.MainPassenger.Username,
+            booking.Status
+            ]);
     }
 }

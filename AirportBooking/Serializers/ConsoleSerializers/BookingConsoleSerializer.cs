@@ -14,7 +14,8 @@ public class BookingConsoleSerializer : IConsoleSerializer<Booking>
             Booking type: {booking.BookingType}
             Class: {string.Join(",", booking.FlightClasses)}
             Passenger:
-            {booking.MainPassenger}
+            {booking.MainPassenger!.Username}
+            Status: {booking.Status}
             --------------------------------------
                Total price: {string.Format("{0:C}", booking.CalculatePrice())}
             --------------------------------------
