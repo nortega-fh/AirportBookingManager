@@ -86,6 +86,11 @@ public class FlightsController : ConsoleViewBase
         }
     }
 
+    public Flight Create(Flight flight)
+    {
+        return null;
+    }
+
     public void PrintToConsole(Flight flight)
     {
         _serializer.PrintToConsole(flight);

@@ -26,6 +26,7 @@ public abstract class ConsoleViewBase
         Console.WriteLine(message);
         PrintOptions(options);
         var answer = ObtainAnswer();
+        Console.Clear();
         var optionChosen = int.Parse(answer) - 1;
         return options[optionChosen];
     }
