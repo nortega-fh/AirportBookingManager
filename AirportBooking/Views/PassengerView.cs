@@ -149,10 +149,13 @@ public class PassengerView : RoleConsoleView
             switch (action)
             {
                 case option1:
+                    EditBookingType(bookingToModify);
                     break;
                 case option2:
+                    EditBookingFlights(bookingToModify);
                     break;
                 case option3:
+                    EditBookingFlightsClasses(bookingToModify);
                     break;
                 case option4:
                     isEditing = false;
@@ -160,6 +163,61 @@ public class PassengerView : RoleConsoleView
             }
         }
 
+    }
+
+    private void EditBookingType(int bookingToModify)
+    {
+        try
+        {
+            var booking = _bookingController.Find(bookingToModify)!;
+            var bookingWithUpdatedType = _bookingConsoleBuilder.SetBookingType().SetFlights().GetBooking();
+            booking.BookingType = bookingWithUpdatedType.BookingType;
+            booking.Flights = bookingWithUpdatedType.Flights;
+            _bookingController.Update(bookingToModify, booking);
+        }
+        catch (Exception ex) when (ex is EntityNotFound<Booking, int>)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private void EditBookingFlights(int bookingToModify)
+    {
+        try
+        {
+            var booking = _bookingController.Find(bookingToModify)!;
+            var bookingWithUpdatedFlihgts = _bookingConsoleBuilder.SetFlights(booking.BookingType).GetBooking();
+            booking.Flights = bookingWithUpdatedFlihgts.Flights;
+            _bookingController.Update(bookingToModify, booking);
+        }
+        catch (Exception ex) when (ex is EntityNotFound<Booking, int>)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private void EditBookingFlightsClasses(int bookingToModify)
+    {
+        try
+        {
+            var booking = _bookingController.Find(bookingToModify)!;
+            List<FlightClass> updatedClasses = [];
+            booking.Flights.ForEach(f =>
+            {
+                var updatedClass = GetValue($"Select a class for the flight {f.Number}", f.ClassPrices.Keys.ToList());
+                updatedClasses.Add(updatedClass);
+            });
+            booking.FlightClasses = updatedClasses;
+            _bookingController.Update(bookingToModify, booking);
+        }
+        catch (Exception ex) when (ex is EntityNotFound<Booking, int>)
+        {
+            Console.WriteLine(ex.Message);
+        }
+        finally
+        {
+            ClearOnInput();
+        }
     }
 
     private void ViewUserBookings()
