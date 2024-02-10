@@ -43,7 +43,7 @@ internal class BookingFilter : IFilter<Booking, BookingParameters>
     private FlightSearchParameters? ObtainFlightParametersFromBookingParamaters(BookingParameters filterParams)
     {
         var (_, minPrice, maxPrice, departureCountry, destinationCountry,
-            departureDate, departureAirport, arrivalAirport, _, flightClass, _) = filterParams;
+            departureDate, departureAirport, arrivalAirport, _, flightClass, _, _) = filterParams;
         if (departureCountry is null || destinationCountry is null || departureDate is null) return null;
         return new FlightSearchParameters(
                 departureCountry,

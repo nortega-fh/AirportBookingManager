@@ -10,6 +10,8 @@ public class Booking
     public List<FlightClass> FlightClasses { get; set; } = [];
     public User? MainPassenger { get; set; } = null;
 
+    public BookingStatus Status { get; set; } = BookingStatus.Confirmed;
+
     public float CalculatePrice()
     {
         var price = 0f;
