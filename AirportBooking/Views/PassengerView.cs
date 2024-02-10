@@ -170,9 +170,10 @@ public class PassengerView : RoleConsoleView
         try
         {
             var booking = _bookingController.Find(bookingToModify)!;
-            var bookingWithUpdatedType = _bookingConsoleBuilder.SetBookingType().SetFlights().GetBooking();
+            var bookingWithUpdatedType = _bookingConsoleBuilder.SetBookingType().SetFlights().SetFlightClasses().GetBooking();
             booking.BookingType = bookingWithUpdatedType.BookingType;
             booking.Flights = bookingWithUpdatedType.Flights;
+            booking.FlightClasses = bookingWithUpdatedType.FlightClasses;
             _bookingController.Update(bookingToModify, booking);
         }
         catch (Exception ex) when (ex is EntityNotFound<Booking, int>)

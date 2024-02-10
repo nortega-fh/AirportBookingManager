@@ -96,6 +96,8 @@ public class BookingRepository : IFileRepository<int, Booking>
         {
             throw new EntityNotFound<Booking, int>(reservationNumber);
         }
+        _reader.WriteRelationshipInformation(booking.ReservationNumber.ToString(),
+            booking.Flights.Select(f => f.Number).ToList());
         _reader.UpdateEntityInformation(reservationNumber.ToString(), _serializer.ToCsv(booking));
         _bookings = _bookings.Select(b => b.ReservationNumber == reservationNumber ? booking : b).ToList();
         return booking;
