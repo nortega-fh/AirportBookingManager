@@ -6,20 +6,18 @@ namespace AirportBooking.Validators.EntityValidators;
 
 public class BookingValidator : IValidator<Booking>
 {
-    private readonly List<InvalidAttributeException> _errors = [];
-
     public void Validate(Booking booking)
     {
-        if (booking.ReservationNumber < 1)
+        const int reservationNumberMinimumValue = 1;
+        if (booking.ReservationNumber < reservationNumberMinimumValue)
         {
             throw new InvalidAttributeException("Reservation Number", "Integer", ["Required", "Value > 0"]);
         }
-        if (booking.Flights.Count < 1 || booking.Flights.Last().DepartureDate < booking.Flights.First().DepartureDate)
+        if (HasInvalidFlights(booking))
         {
             throw new InvalidAttributeException("Flights", "List Flights", ["Required", "Arrival > Departure"]);
         }
-        bool isInvalidBookingType = booking.BookingType < BookingType.OneWay || booking.BookingType > BookingType.RoundTrip;
-        if (isInvalidBookingType)
+        if (HasInvalidBookingType(booking))
         {
             throw new InvalidAttributeException("Booking Type", "Booking Type", ["Required",
                 "Value = {OneWay, RoundTrip}"]);
@@ -29,9 +27,24 @@ public class BookingValidator : IValidator<Booking>
             throw new InvalidAttributeException("Flight Classes", "List Flight Class", ["Required",
                 "Count = Flights Count"]);
         }
-        if (booking.MainPassenger?.Username.Equals(string.Empty) ?? true)
+        if (DoesNotHavePassenger(booking))
         {
             throw new InvalidAttributeException("Main Passenger", "User", ["Required"]);
         }
+    }
+
+    private static bool HasInvalidFlights(Booking booking)
+    {
+        return booking.Flights.Count < 1 || booking.Flights.Last().DepartureDate < booking.Flights.First().DepartureDate;
+    }
+
+    private static bool HasInvalidBookingType(Booking booking)
+    {
+        return booking.BookingType < BookingType.OneWay || booking.BookingType > BookingType.RoundTrip;
+    }
+
+    private static bool DoesNotHavePassenger(Booking booking)
+    {
+        return booking.MainPassenger?.Username.Equals(string.Empty) ?? true;
     }
 }
