@@ -1,13 +1,13 @@
-﻿using AirportBooking.Enums;
+﻿using AirportBooking.Controllers;
+using AirportBooking.Enums;
 using AirportBooking.Models;
-using AirportBooking.Views.Controllers;
 
 namespace AirportBooking.Views.Builders;
 
-public class BookingConsoleBuilder : ConsoleViewBase
+public class BookingConsoleBuilder : BaseConsoleView
 {
     private Booking _booking;
-    private readonly FlightsController _flightsController;
+    private readonly IController<Flight> _flightsController;
 
     public BookingConsoleBuilder(FlightsController flightController)
     {
@@ -32,7 +32,7 @@ public class BookingConsoleBuilder : ConsoleViewBase
         return this;
     }
 
-    Flight BookFlight()
+    private Flight BookFlight()
     {
         IReadOnlyList<Flight>? resultingFlights = null;
         while (resultingFlights is null || resultingFlights.Count < 1)
@@ -51,11 +51,14 @@ public class BookingConsoleBuilder : ConsoleViewBase
 
     public BookingConsoleBuilder SetFlightClasses()
     {
-        if (_booking.Flights.Count == 0)
-            SetFlights();
         var flightClasses = new List<FlightClass>();
-        _booking.Flights.ForEach(flight => flightClasses.Add(GetValue($"Please select a class for the flight {flight.Number}",
-            [FlightClass.Economy, FlightClass.Business, FlightClass.FirstClass])));
+        _booking.Flights.ForEach(flight =>
+        {
+            var selectedClass = GetValue($"Please select a class for the flight {flight.Number}", [FlightClass.Economy,
+                FlightClass.Business,
+                FlightClass.FirstClass]);
+            flightClasses.Add(selectedClass);
+        });
         _booking.FlightClasses = flightClasses;
         return this;
     }

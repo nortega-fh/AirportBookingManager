@@ -1,25 +1,26 @@
-﻿using AirportBooking.Enums;
+﻿using AirportBooking.Controllers;
+using AirportBooking.Enums;
 using AirportBooking.Exceptions;
+using AirportBooking.Globals;
 using AirportBooking.Models;
 using AirportBooking.Views.Builders;
-using AirportBooking.Views.Controllers;
 
-namespace AirportBooking.Views;
+namespace AirportBooking.Views.Menus;
 
 
-public class PassengerView : RoleConsoleView
+public class PassengerMenu : BaseConsoleView, IMenu
 {
     private readonly FlightsController _flightController;
     private readonly BookingsController _bookingController;
     private readonly BookingConsoleBuilder _bookingConsoleBuilder;
-    public PassengerView(FlightsController flightController, BookingsController bookingsController)
+    public PassengerMenu(FlightsController flightController, BookingsController bookingsController)
     {
         _flightController = flightController;
         _bookingController = bookingsController;
         _bookingConsoleBuilder = new(flightController);
     }
 
-    public override void ShowMenu()
+    public void ShowMenu()
     {
         while (UserSession.GetLoggedUser() is not null)
         {
@@ -42,13 +43,13 @@ public class PassengerView : RoleConsoleView
                     ManageBookings();
                     break;
                 case option4:
-                    LogoutUser();
+                    LogOutUser();
                     break;
             }
         }
     }
 
-    private static void LogoutUser()
+    private static void LogOutUser()
     {
         UserSession.LogOutUser();
         Console.WriteLine("Logged out succesfully");

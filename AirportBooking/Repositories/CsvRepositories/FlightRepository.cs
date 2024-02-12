@@ -9,7 +9,7 @@ namespace AirportBooking.Repositories.CsvRepositories;
 public class FlightRepository : IFileRepository<string, Flight>
 {
     private List<Flight> _flights = [];
-    private readonly CSVReader _reader = new("flights");
+    private readonly CsvFileReader _reader = new("flights");
     private readonly FlightCsvSerializer _serializer = new();
     private readonly FlightValidator _validator = new();
     public FlightRepository()
@@ -29,7 +29,7 @@ public class FlightRepository : IFileRepository<string, Flight>
 
     public void Load()
     {
-        var readFlights = _reader.ReadEntityInformation().ToList();
+        var readFlights = _reader.Read().ToList();
         readFlights.ForEach(line => _flights.Add(_serializer.FromCsv(line)));
     }
 

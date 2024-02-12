@@ -1,7 +1,7 @@
 ﻿using AirportBooking.Enums;
 using AirportBooking.Models;
 
-namespace AirportBooking;
+namespace AirportBooking.Globals;
 
 public static class UserSession
 {

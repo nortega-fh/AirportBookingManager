@@ -2,6 +2,11 @@
 
 namespace AirportBooking.DTOs;
 
-public record BookingParameters(string? FlightNumber, float? MinPrice, float? MaxPrice, string? DepartureCountry,
-    string? DestinationCountry, DateTime? DepartureDate, string? DepartureAirport, string? ArrivalAirport,
-    string? Passenger, FlightClass? FlightClass, BookingType? BookingType, BookingStatus? Status);
+public class BookingParameters
+{
+    public string? FlightNumber { get; set; }
+    public string? Passenger { get; set; }
+    public BookingType? BookingType { get; set; }
+    public BookingStatus? Status { get; set; }
+    public FlightSearchParameters? FlightSearchParameters { get; set; }
+}

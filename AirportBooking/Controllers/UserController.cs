@@ -3,9 +3,9 @@ using AirportBooking.Models;
 using AirportBooking.Repositories;
 using AirportBooking.Serializers;
 
-namespace AirportBooking.Views.Controllers;
+namespace AirportBooking.Controllers;
 
-public class UserController
+public class UserController : IController<string, User>
 {
     private readonly IUserRepository _userRepository;
     private readonly IConsoleSerializer<User> _serializer;
@@ -64,8 +64,23 @@ public class UserController
         _userRepository.Delete(username);
     }
 
-    public void PrintToConsole(User user)
+    void IController<string, User>.FindAll()
     {
-        _serializer.PrintToConsole(user);
+        throw new NotImplementedException();
+    }
+
+    public void Find()
+    {
+        throw new NotImplementedException();
+    }
+
+    void IController<string, User>.Create(User entity)
+    {
+        throw new NotImplementedException();
+    }
+
+    void IController<string, User>.Update(string key, User entity)
+    {
+        throw new NotImplementedException();
     }
 }

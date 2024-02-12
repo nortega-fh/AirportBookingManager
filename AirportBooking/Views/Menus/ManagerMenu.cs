@@ -1,19 +1,20 @@
-﻿using AirportBooking.Exceptions;
+﻿using AirportBooking.Controllers;
+using AirportBooking.Exceptions;
 using AirportBooking.FileReaders;
+using AirportBooking.Globals;
 using AirportBooking.Models;
 using AirportBooking.Serializers.CSVSerializers;
-using AirportBooking.Views.Controllers;
 
-namespace AirportBooking.Views;
+namespace AirportBooking.Views.Menus;
 
-public class ManagerView : RoleConsoleView
+public class ManagerMenu : BaseConsoleView, IMenu
 {
     private readonly BookingsController _bookingsController;
     private readonly FlightsController _flightsController;
-    private readonly CSVReader _csvReader;
+    private readonly CsvFileReader _csvReader;
     private readonly FlightCsvSerializer _serializer;
 
-    public ManagerView(BookingsController controller, CSVReader csvReader, FlightsController flightsController, FlightCsvSerializer serializer)
+    public ManagerMenu(BookingsController controller, CsvFileReader csvReader, FlightsController flightsController, FlightCsvSerializer serializer)
     {
         _bookingsController = controller;
         _csvReader = csvReader;
@@ -21,25 +22,26 @@ public class ManagerView : RoleConsoleView
         _serializer = serializer;
     }
 
-    public override void ShowMenu()
+    public void ShowMenu()
     {
         while (UserSession.GetLoggedUser() is not null)
         {
-            const string option1 = "Search bookings";
-            const string option2 = "Upload flights";
-            const string option3 = "Logout";
-            var action = GetValue<string>("Manager Menu", [option1, option2, option3]);
+            const string searchBookings = "Search bookings";
+            const string uploadFlights = "Upload flights";
+            const string logout = "Logout";
+            var action = GetValue<string>("Manager Menu", [searchBookings, uploadFlights, logout]);
             switch (action)
             {
-                case option1:
+                case searchBookings:
                     FilterBookings();
                     break;
-                case option2:
+                case uploadFlights:
                     UploadFlights();
                     break;
-                case option3:
+                case logout:
                     UserSession.LogOutUser();
                     Console.WriteLine("Logged out succesfully");
+                    ClearOnInput();
                     break;
             }
         }
@@ -50,8 +52,7 @@ public class ManagerView : RoleConsoleView
     {
         while (true)
         {
-            var rootPath = Directory.GetParent(Path.Combine("..", ".."))!.FullName;
-            var flightsPath = Path.Combine(rootPath, "Data", "flights");
+            var flightsPath = DataDirectory.GetFlightsPath();
             var existingFiles = Directory.GetFiles(flightsPath, "*.csv");
             Console.WriteLine("Please upload the flight data inside the Data directory at the flights folder. The file must be a csv");
             Console.WriteLine("Press enter once you have placed the new data");

@@ -10,7 +10,7 @@ namespace AirportBooking.Repositories.CsvRepositories;
 public class UserRepository : IUserRepository
 {
     private List<User> _users = [];
-    private readonly CSVReader _csvReader;
+    private readonly CsvFileReader _csvReader;
     private readonly ICSVSerializer<User> _serializer;
     private readonly IValidator<User> _validator;
 
@@ -34,7 +34,7 @@ public class UserRepository : IUserRepository
 
     private void LoadUsers()
     {
-        var readUsers = _csvReader.ReadEntityInformation().ToList();
+        var readUsers = _csvReader.Read().ToList();
         readUsers.ForEach(line => _users.Add(_serializer.FromCsv(line)));
     }
 

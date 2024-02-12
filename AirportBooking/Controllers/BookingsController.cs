@@ -4,10 +4,11 @@ using AirportBooking.Filters;
 using AirportBooking.Models;
 using AirportBooking.Repositories;
 using AirportBooking.Serializers;
+using AirportBooking.Views;
 
-namespace AirportBooking.Views.Controllers;
+namespace AirportBooking.Controllers;
 
-public class BookingsController : ConsoleViewBase
+public class BookingsController : BaseConsoleView, IController<int, Booking>
 {
     private readonly IFileRepository<int, Booking> _repository;
     private readonly IFilter<Booking, BookingParameters> _filter;
@@ -96,5 +97,25 @@ public class BookingsController : ConsoleViewBase
     public void PrintToConsole(Booking booking)
     {
         _serializer.PrintToConsole(booking);
+    }
+
+    void IController<int, Booking>.FindAll()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Find()
+    {
+        throw new NotImplementedException();
+    }
+
+    void IController<int, Booking>.Create(Booking entity)
+    {
+        throw new NotImplementedException();
+    }
+
+    void IController<int, Booking>.Update(int key, Booking entity)
+    {
+        throw new NotImplementedException();
     }
 }

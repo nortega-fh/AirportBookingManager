@@ -10,7 +10,7 @@ public class BookingRepository : IFileRepository<int, Booking>
 {
     private static int _reservationNumber = 1;
     private List<Booking> _bookings = [];
-    private readonly CSVReader _reader = new("bookings", "flights");
+    private readonly CsvFileReader _reader = new("bookings", "flights");
     private static readonly BookingCsvSerializer _serializer = new();
     private readonly BookingValidator _validator = new();
     private readonly IFileRepository<string, User> _userRepository;
@@ -36,7 +36,7 @@ public class BookingRepository : IFileRepository<int, Booking>
 
     public void Load()
     {
-        var storedBookings = _reader.ReadEntityInformation().ToList();
+        var storedBookings = _reader.Read().ToList();
         storedBookings.ForEach(line => _bookings.Add(_serializer.FromCsv(line)));
         _bookings.ForEach(booking =>
         {

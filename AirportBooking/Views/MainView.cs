@@ -1,22 +1,24 @@
-﻿using AirportBooking.Enums;
+﻿using AirportBooking.Controllers;
+using AirportBooking.Enums;
 using AirportBooking.Exceptions;
+using AirportBooking.Globals;
 using AirportBooking.Models;
-using AirportBooking.Views.Controllers;
+using AirportBooking.Views.Menus;
 
 namespace AirportBooking.Views;
 
-public class MainView : ConsoleViewBase
+public class MainView : BaseConsoleView
 {
     private readonly UserRole[] _userRoles = [UserRole.Manager, UserRole.Passenger];
     private readonly UserController _userController;
-    private readonly ManagerView _managerView;
-    private readonly PassengerView _passengerView;
+    private readonly IMenu _managerMenu;
+    private readonly IMenu _passengerMenu;
 
-    public MainView(UserController userController, PassengerView passengerView, ManagerView managerView)
+    public MainView(UserController userController, IMenu passengerMenu, IMenu managerMenu)
     {
         _userController = userController;
-        _managerView = managerView;
-        _passengerView = passengerView;
+        _managerMenu = managerMenu;
+        _passengerMenu = passengerMenu;
     }
 
     public void Login()
@@ -68,38 +70,35 @@ public class MainView : ConsoleViewBase
     public void Show()
     {
         bool isRunning = true;
+        const string login = "Login";
+        const string register = "Register";
+        const string exit = "Exit";
         while (isRunning)
         {
-            string option = GetValue("Welcome to the Airport Booking Management System", ["Login", "Register", "Exit"]);
+            string option = GetValue("Welcome to the Airport Booking Management System", [login, register, exit]);
             switch (option)
             {
-                case "Login":
+                case login:
                     Login();
                     break;
-                case "Register":
+                case register:
                     Register();
                     break;
-                case "Exit":
+                case exit:
                     isRunning = false;
                     break;
             }
-            Console.Clear();
-            if (UserSession.GetLoggedUser() is not null)
+            var user = UserSession.GetLoggedUser();
+            if (user is null) continue;
+            switch (user.Role)
             {
-                ShowMenuForUser();
+                case UserRole.Manager:
+                    _managerMenu.ShowMenu();
+                    break;
+                default:
+                    _passengerMenu.ShowMenu();
+                    break;
             }
-        }
-    }
-
-    void ShowMenuForUser()
-    {
-        if (UserSession.GetLoggedUser()!.Role is UserRole.Manager)
-        {
-            _managerView.ShowMenu();
-        }
-        else
-        {
-            _passengerView.ShowMenu();
         }
     }
 }
