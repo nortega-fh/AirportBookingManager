@@ -2,22 +2,19 @@
 using AirportBooking.FileReaders;
 using AirportBooking.Models;
 using AirportBooking.Serializers.CSVSerializers;
-using AirportBooking.Validators.EntityValidators;
 
-namespace AirportBooking.Repositories.CsvRepositories;
+namespace AirportBooking.Repositories;
 
-public class BookingRepository : IFileRepository<int, Booking>
+public class BookingRepository : IBookingRepository
 {
     private static int _reservationNumber = 1;
     private List<Booking> _bookings = [];
-    private readonly CsvFileReader _reader = new("bookings", "flights");
+    private readonly CsvFileReader _reader = new();
     private static readonly BookingCsvSerializer _serializer = new();
-    private readonly BookingValidator _validator = new();
-    private readonly IFileRepository<string, User> _userRepository;
-    private readonly IFileRepository<string, Flight> _flightRepository;
+    private readonly IUserRepository _userRepository;
+    private readonly IFlightRepository _flightRepository;
 
-    public BookingRepository(IFileRepository<string, User> userRepository,
-        IFileRepository<string, Flight> flightRepository)
+    public BookingRepository(IUserRepository userRepository, IFlightRepository flightRepository)
     {
         _userRepository = userRepository;
         _flightRepository = flightRepository;
@@ -25,7 +22,7 @@ public class BookingRepository : IFileRepository<int, Booking>
         {
             Load();
         }
-        catch (Exception e) when (e is ArgumentException or EntitySerializationException<Booking> or InvalidAttributeException)
+        catch (Exception e) when (e is ArgumentException or EntityReadingException<Booking> or InvalidAttributeException)
         {
             _bookings.Clear();
             Console.WriteLine("Couldn't load booking information due to incorrect data:");

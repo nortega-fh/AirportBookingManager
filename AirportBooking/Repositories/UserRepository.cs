@@ -5,7 +5,7 @@ using AirportBooking.Serializers;
 using AirportBooking.Validators;
 using System.Collections.Immutable;
 
-namespace AirportBooking.Repositories.CsvRepositories;
+namespace AirportBooking.Repositories;
 
 public class UserRepository : IUserRepository
 {
@@ -23,7 +23,7 @@ public class UserRepository : IUserRepository
         {
             LoadUsers();
         }
-        catch (Exception ex) when (ex is InvalidAttributeException or EntitySerializationException<User>)
+        catch (Exception ex) when (ex is InvalidAttributeException or EntityReadingException<User>)
         {
             _users.Clear();
             Console.WriteLine("Couldn't load users");

@@ -2,7 +2,9 @@
 
 namespace AirportBooking.Repositories;
 
-public interface IUserRepository : IFileRepository<string, User>
+public interface IUserRepository
 {
-    User Login(string username, string password);
+    User Find(string username);
+    User Find(string username, string password);
+    User Create(User user);
 }

@@ -11,11 +11,11 @@ namespace AirportBooking.Controllers;
 
 public class FlightsController : BaseConsoleView, IController<string, Flight>
 {
-    private readonly IFileRepository<string, Flight> _repository;
+    private readonly IBookingRepository<string, Flight> _repository;
     private readonly IFilter<Flight, FlightSearchParameters> _filter;
     private readonly IFlightConsoleSerializer _serializer;
 
-    public FlightsController(IFileRepository<string, Flight> repository, IFlightConsoleSerializer serializer,
+    public FlightsController(IBookingRepository<string, Flight> repository, IFlightConsoleSerializer serializer,
         IFilter<Flight, FlightSearchParameters> filter)
     {
         _repository = repository;

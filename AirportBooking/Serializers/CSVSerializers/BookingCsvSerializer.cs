@@ -5,7 +5,7 @@ using AirportBooking.Validators.CsvValidators;
 
 namespace AirportBooking.Serializers.CSVSerializers;
 
-public class BookingCsvSerializer : ICSVSerializer<Booking>
+public class BookingCsvSerializer : ICsvSerializer<Booking>
 {
     private readonly BookingCsvValidator _validator = new();
     public Booking FromCsv(string csvLine)
@@ -32,7 +32,7 @@ public class BookingCsvSerializer : ICSVSerializer<Booking>
 
     public string ToCsv(Booking booking)
     {
-        if (booking.MainPassenger is null) throw new EntitySerializationException<Booking>("Booking passenger can't be null");
+        if (booking.MainPassenger is null) throw new EntityReadingException<Booking>("Booking passenger can't be null");
         return string.Join(",", [
             booking.ReservationNumber,
             booking.BookingType,

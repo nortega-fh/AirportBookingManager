@@ -1,7 +1,7 @@
 ﻿namespace AirportBooking.Exceptions;
 
-public class InvalidAttributeException(string attributeName, string attributeType, string[] constraints) : Exception($"""
+public class InvalidAttributeException<T>(string attributeName, string[] constraints) : Exception($"""
         * {attributeName}:
-            * Type: {attributeType}
+            * Type: {typeof(T).Name}
             * Constraint: {string.Join(",", constraints)}
         """);

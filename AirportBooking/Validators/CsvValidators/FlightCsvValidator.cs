@@ -1,76 +1,54 @@
-﻿using AirportBooking.Exceptions;
+﻿using AirportBooking.Constants;
+using AirportBooking.Exceptions;
 using AirportBooking.Models;
 
 namespace AirportBooking.Validators.CsvValidators;
 
-public class FlightCsvValidator : ICsvValidator
+public class FlightCsvValidator : CsvValidatorBase
 {
     const int minLineLength = 8;
     public string[] Validate(string csvLine)
     {
         var data = csvLine.Split(",");
-        var error = new EntitySerializationException<Flight>($"The data for the flight is incomplete");
         if (data.Length < minLineLength)
         {
-            throw error;
+            throw new EntityReadingException<Flight>($"The data for the flight is incomplete");
         }
-        var flightPricesInformation = GetFlightPrices(data);
-        ValidatePricingInformation([.. flightPricesInformation]);
-        var totalPricesForFlight = flightPricesInformation.Length;
-        if (data.Length < minLineLength + totalPricesForFlight - 1)
+        if (IsStringInvalid(data[0]))
         {
-            throw error;
+            throw new InvalidAttributeException<string>("Flight number", EntityValueRestriction.Restrictions[Restriction.Field]);
         }
-        var (originCountryPosition, destinationCountryPosition) = (totalPricesForFlight + 1, totalPricesForFlight + 2);
-        var (departureAirportPosition, destinationAirportPosition) = (totalPricesForFlight + 5, totalPricesForFlight + 6);
-        var isAnyStringValueInvalid = IsStringInvalid(data[originCountryPosition])
-            || IsStringInvalid(data[destinationCountryPosition])
-            || IsStringInvalid(data[departureAirportPosition])
-            || IsStringInvalid(data[destinationAirportPosition]);
-        if (isAnyStringValueInvalid)
+        for (int i = 1; i <= 3; i++)
         {
-            throw error;
+            if (data[i] is not "null" && !decimal.TryParse(data[i].Replace(".", ","), out var _))
+            {
+                throw new InvalidAttributeException<decimal>("Flight price", EntityValueRestriction.Restrictions[Restriction.Price]);
+            }
         }
-        var (departureDatePosition, arrivalDatePosition) = (totalPricesForFlight + 3, totalPricesForFlight + 4);
-        var isAnyDateInvalid = IsDateTimeInvalid(data[departureDatePosition]) || IsDateTimeInvalid(data[arrivalDatePosition]);
-        if (isAnyDateInvalid)
+        if (IsStringInvalid(data[4]))
         {
-            throw error;
+            throw new InvalidAttributeException<string>("Origin country", EntityValueRestriction.Restrictions[Restriction.Field]);
+        }
+        if (IsStringInvalid(data[5]))
+        {
+            throw new InvalidAttributeException<string>("Destination country", EntityValueRestriction.Restrictions[Restriction.Field]);
+        }
+        if (!DateTime.TryParse(data[6], out var _))
+        {
+            throw new InvalidAttributeException<DateTime>("Departure date", EntityValueRestriction.Restrictions[Restriction.Date]);
+        }
+        if (!DateTime.TryParse(data[7], out var _))
+        {
+            throw new InvalidAttributeException<DateTime>("Arrival date", EntityValueRestriction.Restrictions[Restriction.Date]);
+        }
+        if (IsStringInvalid(data[4]))
+        {
+            throw new InvalidAttributeException<string>("Origin airport", EntityValueRestriction.Restrictions[Restriction.Field]);
+        }
+        if (IsStringInvalid(data[5]))
+        {
+            throw new InvalidAttributeException<string>("Destination airport", EntityValueRestriction.Restrictions[Restriction.Field]);
         }
         return data;
-    }
-    private static string[] GetFlightPrices(string[] data)
-    {
-        return data.Where(pricePair => pricePair.Split(":").Length == 2).ToArray();
-    }
-
-    private static void ValidatePricingInformation(string[] prices)
-    {
-        if (prices.Length == 0)
-            throw new EntitySerializationException<Flight>($"There is no price data");
-        foreach (var price in prices)
-        {
-            ValidatePrice(price);
-        }
-    }
-
-    private static void ValidatePrice(string price)
-    {
-        var amount = price.Split(":")[1].Replace(".", ",");
-        if (!float.TryParse(amount, out float _))
-        {
-            throw new EntitySerializationException<Flight>($"Value for price is in incorrect format, " +
-                $"decimal value should be after a dot (.)");
-        }
-    }
-
-    private static bool IsDateTimeInvalid(string? value)
-    {
-        return !DateTime.TryParse(value, out var _);
-    }
-
-    private static bool IsStringInvalid(string? value)
-    {
-        return value is null || value.Equals(string.Empty);
     }
 }

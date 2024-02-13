@@ -8,10 +8,10 @@ namespace AirportBooking.Filters;
 
 internal class BookingFilter : IFilter<Booking, BookingParameters>
 {
-    private readonly IFileRepository<string, Flight> _fightRepository;
+    private readonly IBookingRepository<string, Flight> _fightRepository;
     private readonly IFilter<Flight, FlightSearchParameters> _flightFilter;
 
-    public BookingFilter(IFilter<Flight, FlightSearchParameters> flightFilter, IFileRepository<string, Flight> flightRepository)
+    public BookingFilter(IFilter<Flight, FlightSearchParameters> flightFilter, IBookingRepository<string, Flight> flightRepository)
     {
         _fightRepository = flightRepository;
         _flightFilter = flightFilter;

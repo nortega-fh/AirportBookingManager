@@ -11,5 +11,5 @@ public class Flight
     public DateTime ArrivalDate { get; set; } = DateTime.Now;
     public string OriginAirport { get; set; } = string.Empty;
     public string DestinationAirport { get; set; } = string.Empty;
-    public SortedDictionary<FlightClass, float> ClassPrices { get; set; } = [];
+    public SortedDictionary<FlightClass, decimal> ClassPrices { get; set; } = [];
 }

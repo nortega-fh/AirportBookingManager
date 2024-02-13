@@ -73,7 +73,7 @@ public class ManagerMenu : BaseConsoleView, IMenu
                 {
                     _flightsController.Create(_serializer.FromCsv(line));
                 }
-                catch (Exception ex) when (ex is EntitySerializationException<Flight>)
+                catch (Exception ex) when (ex is EntityReadingException<Flight>)
                 {
                     errorList.Add(ex);
                 }

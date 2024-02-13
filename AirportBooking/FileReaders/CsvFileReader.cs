@@ -2,7 +2,7 @@
 
 namespace AirportBooking.FileReaders;
 
-public class CsvFileReader() : IFileHandler
+public class CsvFileReader()
 {
     private static readonly string root = DataDirectory.GetRootPath();
 

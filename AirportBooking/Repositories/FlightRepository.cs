@@ -4,9 +4,9 @@ using AirportBooking.Models;
 using AirportBooking.Serializers.CSVSerializers;
 using AirportBooking.Validators.EntityValidators;
 
-namespace AirportBooking.Repositories.CsvRepositories;
+namespace AirportBooking.Repositories;
 
-public class FlightRepository : IFileRepository<string, Flight>
+public class FlightRepository : IBookingRepository<string, Flight>
 {
     private List<Flight> _flights = [];
     private readonly CsvFileReader _reader = new("flights");
@@ -18,7 +18,7 @@ public class FlightRepository : IFileRepository<string, Flight>
         {
             Load();
         }
-        catch (Exception ex) when (ex is ArgumentException or InvalidAttributeException or EntitySerializationException<Flight>)
+        catch (Exception ex) when (ex is ArgumentException or InvalidAttributeException or EntityReadingException<Flight>)
         {
             _flights.Clear();
             Console.WriteLine("Couldn't load flight data");

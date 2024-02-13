@@ -10,6 +10,6 @@ public class FlightSearchParameters
     public string? DepartureAirport { get; set; }
     public string? ArrivalAirport { get; set; }
     public FlightClass? FlightClass { get; set; }
-    public float MinPrice { get; set; } = 0f;
-    public float MaxPrice { get; set; } = float.MaxValue;
+    public decimal MinPrice { get; set; } = 0m;
+    public decimal MaxPrice { get; set; } = decimal.MaxValue;
 }
