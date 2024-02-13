@@ -1,4 +1,4 @@
-﻿using AirportBooking.Globals;
+﻿using AirportBooking.Constants;
 
 namespace AirportBooking.FileReaders;
 

@@ -1,4 +1,4 @@
-﻿namespace AirportBooking.Globals;
+﻿namespace AirportBooking.Constants;
 
 public static class DataDirectory
 {
@@ -6,28 +6,29 @@ public static class DataDirectory
     private static readonly string bookingsPath = Path.Combine(rootPath, "bookings");
     private static readonly string flightsPath = Path.Combine(rootPath, "flights");
     private static readonly string usersPath = Path.Combine(rootPath, "users");
+    private const string fileExtension = ".csv";
 
     public static string GetFilePath(string path)
     {
-        return Path.Combine(rootPath, path);
+        return Path.Combine(rootPath, path + fileExtension);
     }
     public static string GetRootPath()
     {
-        return rootPath;
+        return rootPath + fileExtension;
     }
 
     public static string GetBookingsPath()
     {
-        return bookingsPath;
+        return bookingsPath + fileExtension;
     }
 
     public static string GetFlightsPath()
     {
-        return flightsPath;
+        return flightsPath + fileExtension;
     }
 
     public static string GetUsersPath()
     {
-        return usersPath;
+        return usersPath + fileExtension;
     }
 }
