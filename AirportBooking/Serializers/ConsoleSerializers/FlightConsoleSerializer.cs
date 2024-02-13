@@ -2,7 +2,7 @@
 
 namespace AirportBooking.Serializers.ConsoleSerializers;
 
-public class FlightConsoleSerializer : IFlightConsoleSerializer
+public class FlightConsoleSerializer
 {
     public void PrintToConsole(Flight entity)
     {

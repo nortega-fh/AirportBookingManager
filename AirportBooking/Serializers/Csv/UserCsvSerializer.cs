@@ -1,19 +1,13 @@
 ﻿using AirportBooking.Enums;
 using AirportBooking.Models;
-using AirportBooking.Validators;
 using AirportBooking.Validators.CsvValidators;
 
-namespace AirportBooking.Serializers.CSVSerializers;
+namespace AirportBooking.Serializers.Csv;
 
-public class UserCsvSerializer : ICSVSerializer<User>
+public class UserCsvSerializer
 {
-    private readonly IValidator<User> _entityValidator;
     private readonly UserCsvValidator _csvValidator = new();
 
-    public UserCsvSerializer(IValidator<User> validator)
-    {
-        _entityValidator = validator;
-    }
     public User FromCsv(string csvLine)
     {
         var data = _csvValidator.Validate(csvLine);
@@ -26,9 +20,6 @@ public class UserCsvSerializer : ICSVSerializer<User>
         };
     }
 
-    public string ToCsv(User user)
-    {
-        _entityValidator.Validate(user);
-        return string.Join(",", [user.Username, user.Password, user.Role]);
-    }
+    public string ToCsv(User user) => string.Join(",", [user.Username, user.Password, user.Role]);
+
 }

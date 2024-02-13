@@ -2,7 +2,7 @@
 
 namespace AirportBooking.Serializers.ConsoleSerializers;
 
-public class UserConsoleSerializer : IConsoleSerializer<User>
+public class UserConsoleSerializer
 {
     public void PrintToConsole(User user)
     {

@@ -1,12 +1,13 @@
-﻿namespace AirportBooking.Validators.CsvValidators;
+﻿using AirportBooking.Constants;
+
+namespace AirportBooking.Validators.CsvValidators;
 
 public abstract class CsvValidatorBase
 {
-    protected const string valueSkipper = "null";
 
     protected static bool IsOptionalFieldInvalid(string value)
     {
-        return !(value is valueSkipper || value is not "");
+        return !(value is CsvValueSkipper.ValueSkipper || value is not "");
     }
 
     protected static bool IsStringInvalid(string field)

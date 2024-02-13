@@ -20,7 +20,7 @@ public class BookingCsvValidator : CsvValidatorBase
         {
             throw new InvalidAttributeException<BookingType>("Booking Type", EntityValueRestriction.Restrictions[Restriction.Field]);
         }
-        if (data[2] is "" or null or valueSkipper)
+        if (data[2] is "" or null or CsvValueSkipper.ValueSkipper)
         {
             throw new InvalidAttributeException<string>("First flight number", EntityValueRestriction.Restrictions[Restriction.Field]);
         }
@@ -36,7 +36,7 @@ public class BookingCsvValidator : CsvValidatorBase
         {
             throw new InvalidAttributeException<FlightClass>("Second flight class", EntityValueRestriction.Restrictions[Restriction.OptionalFlightClass]);
         }
-        if (data[6] is valueSkipper or "")
+        if (data[6] is CsvValueSkipper.ValueSkipper or "")
         {
             throw new InvalidAttributeException<string>("Passenger's username", EntityValueRestriction.Restrictions[Restriction.Field]);
         }
