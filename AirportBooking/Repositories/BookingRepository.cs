@@ -1,13 +1,16 @@
-﻿using AirportBooking.Exceptions;
+﻿using AirportBooking.Constants;
+using AirportBooking.DTOs;
+using AirportBooking.Exceptions;
 using AirportBooking.FileReaders;
 using AirportBooking.Models;
-using AirportBooking.Serializers.CSVSerializers;
+using AirportBooking.Serializers.Csv;
 
 namespace AirportBooking.Repositories;
 
 public class BookingRepository : IBookingRepository
 {
     private static int _reservationNumber = 1;
+    private static readonly string bookingsFilePath = DataDirectory.GetBookingsPath();
     private List<Booking> _bookings = [];
     private readonly CsvFileReader _reader = new();
     private static readonly BookingCsvSerializer _serializer = new();
@@ -22,7 +25,7 @@ public class BookingRepository : IBookingRepository
         {
             Load();
         }
-        catch (Exception e) when (e is ArgumentException or EntityReadingException<Booking> or InvalidAttributeException)
+        catch (Exception e) when (e is SerializationException)
         {
             _bookings.Clear();
             Console.WriteLine("Couldn't load booking information due to incorrect data:");
@@ -31,37 +34,28 @@ public class BookingRepository : IBookingRepository
         }
     }
 
-    public void Load()
+    private void Load()
     {
-        var storedBookings = _reader.Read().ToList();
+        var storedBookings = _reader.Read(bookingsFilePath).ToList();
         storedBookings.ForEach(line => _bookings.Add(_serializer.FromCsv(line)));
-        _bookings.ForEach(booking =>
+        _bookings = _bookings.Select(booking =>
         {
-            booking.Flights = FindBookingFlights(booking.ReservationNumber);
-            booking.MainPassenger = FindBookingMainPassenger(booking.MainPassenger?.Username);
-            _validator.Validate(booking);
-        });
+            booking.Flights = FindBookingFlights(booking);
+            booking.MainPassenger = FindBookingMainPassenger(booking);
+            return booking;
+        }).ToList();
         var lastReadReservationNumber = _bookings.LastOrDefault()?.ReservationNumber ?? 1;
         _reservationNumber = lastReadReservationNumber > 1 ? lastReadReservationNumber + 1 : lastReadReservationNumber;
     }
 
-    private List<Flight> FindBookingFlights(int bookingId)
+    private List<Flight> FindBookingFlights(Booking booking)
     {
-        var hasFlights = _reader.GetRelationshipInformation().TryGetValue(bookingId.ToString(), out var flightNumbers);
-        if (!hasFlights)
-        {
-            throw new InvalidAttributeException("Flights", "List of Flights", ["Required", "Departure < Arrival"]);
-        }
-        var flights = flightNumbers?.ToList().Select(number => _flightRepository.Find(number)
-        ?? throw new EntityNotFound<Flight, string>(number)).ToList();
-
-        return flights ?? throw new InvalidAttributeException("Flights", "List of Flights", ["Required", "Departure < Arrival"]);
+        return booking.Flights.Select(flight => _flightRepository.Find(flight.Number)).ToList();
     }
 
-    private User FindBookingMainPassenger(string? username)
+    private User FindBookingMainPassenger(Booking booking)
     {
-        if (username is null) throw new InvalidAttributeException("Main Passenger", "User", ["Required"]);
-        return _userRepository.Find(username) ?? throw new EntityNotFound<User, string>(username);
+        return _userRepository.Find(booking.MainPassenger!.Username);
     }
 
     public Booking Find(int rerservationNumber)
@@ -75,14 +69,16 @@ public class BookingRepository : IBookingRepository
         return _bookings;
     }
 
+    public IReadOnlyList<Booking> Filter(BookingParameters filters)
+    {
+        return [];
+    }
+
     public Booking Save(Booking booking)
     {
         booking.ReservationNumber = _reservationNumber;
-        _validator.Validate(booking);
         _reservationNumber++;
-        _reader.WriteEntityInformation(_serializer.ToCsv(booking));
-        _reader.WriteRelationshipInformation(booking.ReservationNumber.ToString(),
-            booking.Flights.Select(f => f.Number).ToList());
+        _reader.Write(bookingsFilePath, _serializer.ToCsv(booking));
         _bookings.Add(booking);
         return booking;
     }
@@ -93,9 +89,7 @@ public class BookingRepository : IBookingRepository
         {
             throw new EntityNotFound<Booking, int>(reservationNumber);
         }
-        _reader.WriteRelationshipInformation(booking.ReservationNumber.ToString(),
-            booking.Flights.Select(f => f.Number).ToList());
-        _reader.UpdateEntityInformation(reservationNumber.ToString(), _serializer.ToCsv(booking));
+        _reader.UpdateLine(bookingsFilePath, reservationNumber.ToString(), _serializer.ToCsv(booking));
         _bookings = _bookings.Select(b => b.ReservationNumber == reservationNumber ? booking : b).ToList();
         return booking;
     }
@@ -106,7 +100,7 @@ public class BookingRepository : IBookingRepository
         {
             throw new EntityNotFound<Booking, int>(reservationNumber);
         }
-        _reader.DeleteEntityInformation(reservationNumber.ToString(), true);
+        _reader.DeleteLine(bookingsFilePath, reservationNumber.ToString());
         _bookings = _bookings.Where(b => b.ReservationNumber != reservationNumber).ToList();
     }
 }

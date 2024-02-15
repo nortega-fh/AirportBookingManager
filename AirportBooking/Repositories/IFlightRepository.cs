@@ -5,10 +5,9 @@ namespace AirportBooking.Repositories;
 
 public interface IFlightRepository
 {
+    void Load(string? fileName = null);
     Flight Find(string flightNumber);
     IReadOnlyList<Flight> FindAll();
-    Flight Save(Flight flight);
-    Flight Update(string flightNumber, Flight flight);
+
     IReadOnlyList<Flight> Filter(FlightSearchParameters filters);
-    void Delete(string flightNumber);
 }

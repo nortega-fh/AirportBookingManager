@@ -1,24 +1,26 @@
-﻿using AirportBooking.Exceptions;
+﻿using AirportBooking.Constants;
+using AirportBooking.DTOs;
+using AirportBooking.Exceptions;
 using AirportBooking.FileReaders;
 using AirportBooking.Models;
-using AirportBooking.Serializers.CSVSerializers;
-using AirportBooking.Validators.EntityValidators;
+using AirportBooking.Serializers.Csv;
 
 namespace AirportBooking.Repositories;
 
-public class FlightRepository : IBookingRepository<string, Flight>
+public class FlightRepository : IFlightRepository
 {
     private List<Flight> _flights = [];
-    private readonly CsvFileReader _reader = new("flights");
+    private readonly CsvFileReader _reader = new();
     private readonly FlightCsvSerializer _serializer = new();
-    private readonly FlightValidator _validator = new();
+    private readonly static string flightsFileName = DataDirectory.GetFlightsPath();
+
     public FlightRepository()
     {
         try
         {
             Load();
         }
-        catch (Exception ex) when (ex is ArgumentException or InvalidAttributeException or EntityReadingException<Flight>)
+        catch (Exception ex) when (ex is SerializationException)
         {
             _flights.Clear();
             Console.WriteLine("Couldn't load flight data");
@@ -27,16 +29,10 @@ public class FlightRepository : IBookingRepository<string, Flight>
         }
     }
 
-    public void Load()
+    public void Load(string? file = null)
     {
-        var readFlights = _reader.Read().ToList();
+        var readFlights = _reader.Read(file ?? flightsFileName).ToList();
         readFlights.ForEach(line => _flights.Add(_serializer.FromCsv(line)));
-    }
-
-    public Flight Find(string flightNumber)
-    {
-        return _flights.Find(f => f.Number.Equals(flightNumber, StringComparison.OrdinalIgnoreCase))
-            ?? throw new EntityNotFound<Flight, string>(flightNumber);
     }
 
     public IReadOnlyList<Flight> FindAll()
@@ -44,39 +40,14 @@ public class FlightRepository : IBookingRepository<string, Flight>
         return _flights;
     }
 
-    public Flight Save(Flight flight)
+    public Flight Find(string flightNumber)
     {
-        var existingFlight = _flights.Find(f => f.Number.Equals(flight.Number, StringComparison.OrdinalIgnoreCase));
-        if (existingFlight is not null)
-        {
-            throw new EntityAlreadyExists<Flight, string>(flight.Number);
-        }
-        _validator.Validate(flight);
-        _reader.WriteEntityInformation(_serializer.ToCsv(flight));
-        _flights.Add(flight);
-        return flight;
+        return _flights.Find(f => f.Number.Equals(flightNumber))
+            ?? throw new EntityNotFound<Flight, string>(flightNumber);
     }
 
-    public Flight Update(string flightNumber, Flight newFlight)
+    public IReadOnlyList<Flight> Filter(FlightSearchParameters filters)
     {
-        if (_flights.Find(f => f.Number.Equals(flightNumber, StringComparison.OrdinalIgnoreCase)) is null)
-        {
-            throw new EntityNotFound<Flight, string>(flightNumber);
-        }
-        _validator.Validate(newFlight);
-        _reader.UpdateEntityInformation(flightNumber, _serializer.ToCsv(newFlight));
-        _flights = _flights.Select(f => f.Number.Equals(flightNumber,
-            StringComparison.OrdinalIgnoreCase) ? newFlight : f).ToList();
-        return newFlight;
-    }
-
-    public void Delete(string flightNumber)
-    {
-        if (_flights.Find(f => f.Number.Equals(flightNumber, StringComparison.OrdinalIgnoreCase)) is null)
-        {
-            throw new EntityNotFound<Flight, string>(flightNumber);
-        }
-        _reader.DeleteEntityInformation(flightNumber);
-        _flights = _flights.Where(f => !f.Number.Equals(flightNumber, StringComparison.OrdinalIgnoreCase)).ToList();
+        return [];
     }
 }
