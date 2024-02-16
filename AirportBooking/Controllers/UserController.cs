@@ -1,86 +1,62 @@
 ﻿using AirportBooking.Exceptions;
 using AirportBooking.Models;
 using AirportBooking.Repositories;
-using AirportBooking.Serializers;
+using AirportBooking.Validators.EntityValidators;
 
 namespace AirportBooking.Controllers;
 
-public class UserController : IController<string, User>
+public class UserController
 {
     private readonly IUserRepository _userRepository;
-    private readonly IConsoleSerializer<User> _serializer;
+    private readonly static UserValidator _validator = new();
 
-    public UserController(IUserRepository userRepository, IConsoleSerializer<User> serializer)
+    public UserController(IUserRepository userRepository)
     {
         _userRepository = userRepository;
-        _serializer = serializer;
     }
 
-    public IReadOnlyList<User> FindAll()
-    {
-        return _userRepository.FindAll();
-    }
-
-    public User? Find(string username, string password)
-    {
-        return _userRepository.Login(username, password);
-    }
-
-    public User? Find(string username)
-    {
-        return _userRepository.Find(username);
-    }
-
-    public User? Create(User user)
+    public User? FindUser(string username, string password)
     {
         try
         {
-            var createdUser = _userRepository.Save(user);
-            Console.WriteLine("User succesfully created");
-            return createdUser;
+            return _userRepository.Find(username, password);
         }
-        catch (Exception ex) when (ex is EntityAlreadyExists<User, string>)
+        catch (EntityNotFound<User, string> ex)
         {
             Console.WriteLine(ex.Message);
         }
         return null;
     }
 
-    public User? Update(string username, User newUser)
+    public User? FindUser(string username)
     {
         try
         {
-            return _userRepository.Update(username, newUser);
+            return _userRepository.Find(username);
         }
-        catch (Exception ex) when (ex is EntityNotFound<User, string>)
+        catch (EntityNotFound<User, string> ex)
         {
             Console.WriteLine(ex.Message);
         }
         return null;
     }
 
-    public void Delete(string username)
+    public User? CreatePassenger(string username, string password)
     {
-        _userRepository.Delete(username);
-    }
-
-    void IController<string, User>.FindAll()
-    {
-        throw new NotImplementedException();
-    }
-
-    public void Find()
-    {
-        throw new NotImplementedException();
-    }
-
-    void IController<string, User>.Create(User entity)
-    {
-        throw new NotImplementedException();
-    }
-
-    void IController<string, User>.Update(string key, User entity)
-    {
-        throw new NotImplementedException();
+        try
+        {
+            var validatedUser = _validator.Validate(new User
+            {
+                Username = username,
+                Password = password,
+                Role = Enums.UserRole.Passenger
+            });
+            return _userRepository.Create(validatedUser);
+        }
+        catch (EntityAlreadyExists<User, string> ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+        return null;
     }
 }

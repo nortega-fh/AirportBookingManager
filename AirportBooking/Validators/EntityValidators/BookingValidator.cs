@@ -1,36 +1,36 @@
-﻿using AirportBooking.Enums;
+﻿using AirportBooking.Constants;
+using AirportBooking.Enums;
 using AirportBooking.Exceptions;
 using AirportBooking.Models;
 
 namespace AirportBooking.Validators.EntityValidators;
 
-public class BookingValidator : IValidator<Booking>
+public class BookingValidator
 {
-    public void Validate(Booking booking)
+    public Booking Validate(Booking booking)
     {
         const int reservationNumberMinimumValue = 1;
         if (booking.ReservationNumber < reservationNumberMinimumValue)
         {
-            throw new InvalidAttributeException("Reservation Number", "Integer", ["Required", "Value > 0"]);
+            throw new InvalidAttributeException<int>("Reservation Number", EntityValueRestriction.Restrictions[Restriction.PositiveNumber]);
         }
         if (HasInvalidFlights(booking))
         {
-            throw new InvalidAttributeException("Flights", "List Flights", ["Required", "Arrival > Departure"]);
+            throw new InvalidAttributeException<List<Flight>>("Flights", EntityValueRestriction.Restrictions[Restriction.Arrival]);
         }
         if (HasInvalidBookingType(booking))
         {
-            throw new InvalidAttributeException("Booking Type", "Booking Type", ["Required",
-                "Value = {OneWay, RoundTrip}"]);
+            throw new InvalidAttributeException<string>("Booking Type", EntityValueRestriction.Restrictions[Restriction.BookingType]);
         }
         if (booking.FlightClasses.Count < booking.Flights.Count)
         {
-            throw new InvalidAttributeException("Flight Classes", "List Flight Class", ["Required",
-                "Count = Flights Count"]);
+            throw new InvalidAttributeException<List<Flight>>("Flight Classes", EntityValueRestriction.Restrictions[Restriction.FlightClass]);
         }
         if (DoesNotHavePassenger(booking))
         {
-            throw new InvalidAttributeException("Main Passenger", "User", ["Required"]);
+            throw new InvalidAttributeException<string>("Passenger", EntityValueRestriction.Restrictions[Restriction.Field]);
         }
+        return booking;
     }
 
     private static bool HasInvalidFlights(Booking booking)
