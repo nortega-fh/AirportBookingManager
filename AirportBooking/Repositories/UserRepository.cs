@@ -8,18 +8,19 @@ namespace AirportBooking.Repositories;
 public class UserRepository : IUserRepository
 {
     private readonly IFileReader _reader;
-    private readonly UserCsvSerializer _serializer = new();
+    private readonly IUserCsvSerializer _serializer;
     private readonly static string UsersFile = Path.Combine("..", "..", "..", "Data", "users.csv");
 
-    public UserRepository(IFileReader reader)
+    public UserRepository(IFileReader reader, IUserCsvSerializer serializer)
     {
         _reader = reader;
+        _serializer = serializer;
     }
 
     public User? Find(string username)
     {
         return _reader.Read(UsersFile)
-            .Select(_serializer.FromCsv)
+            .Select(_serializer.From)
             .Where(u => u.Username == username)
             .FirstOrDefault();
     }
@@ -27,7 +28,7 @@ public class UserRepository : IUserRepository
     public User? Find(string username, string password)
     {
         return _reader.Read(UsersFile)
-            .Select(_serializer.FromCsv)
+            .Select(_serializer.From)
             .Where(u => u.Username.Equals(username) && u.Password.Equals(password))
             .FirstOrDefault();
     }
@@ -39,7 +40,7 @@ public class UserRepository : IUserRepository
         {
             throw new EntityAlreadyExists<User, string>(user.Username);
         }
-        _reader.Write(UsersFile, _serializer.ToCsv(user));
+        _reader.Write(UsersFile, _serializer.To(user));
         return user;
     }
 }

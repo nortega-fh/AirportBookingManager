@@ -4,13 +4,18 @@ using AirportBooking.Validators.CsvValidators;
 
 namespace AirportBooking.Serializers.Csv;
 
-public class UserCsvSerializer
+public class UserCsvSerializer : IUserCsvSerializer
 {
-    private readonly UserCsvValidator _csvValidator = new();
+    private readonly IUserCsvValidator _validator;
 
-    public User FromCsv(string csvLine)
+    public UserCsvSerializer(IUserCsvValidator validator)
     {
-        var data = _csvValidator.Validate(csvLine);
+        _validator = validator;
+    }
+
+    public User From(string csvLine)
+    {
+        var data = _validator.Validate(csvLine);
         var (username, password, role) = (data[0], data[1], Enum.Parse<UserRole>(data[2], true));
         return new User
         {
@@ -20,6 +25,6 @@ public class UserCsvSerializer
         };
     }
 
-    public string ToCsv(User user) => string.Join(",", [user.Username, user.Password, user.Role]);
+    public string To(User user) => string.Join(",", [user.Username, user.Password, user.Role]);
 
 }

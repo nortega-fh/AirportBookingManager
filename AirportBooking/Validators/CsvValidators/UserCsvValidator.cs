@@ -5,7 +5,7 @@ using AirportBooking.Models;
 
 namespace AirportBooking.Validators.CsvValidators;
 
-public class UserCsvValidator : CsvValidatorBase
+public class UserCsvValidator : CsvValidatorBase, IUserCsvValidator
 {
     const int minLineLenght = 3;
     public string[] Validate(string csvLine)
