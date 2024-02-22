@@ -12,9 +12,9 @@ public class Booking
 
     public BookingStatus Status { get; set; } = BookingStatus.Confirmed;
 
-    public float CalculatePrice()
+    public decimal CalculatePrice()
     {
-        var price = 0f;
+        var price = 0m;
         for (var i = 0; i < Flights.Count; i++)
         {
             price += Flights[i].ClassPrices[FlightClasses[i]];

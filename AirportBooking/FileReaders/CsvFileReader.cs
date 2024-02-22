@@ -1,16 +1,12 @@
-﻿using AirportBooking.Constants;
+﻿namespace AirportBooking.FileReaders;
 
-namespace AirportBooking.FileReaders;
-
-public class CsvFileReader()
+public class CsvFileReader() : IFileReader
 {
-    private static readonly string root = DataDirectory.GetRootPath();
-
     public string[] Read(string fileName)
     {
         try
         {
-            using var reader = File.OpenText(GetFilePath(fileName));
+            using var reader = File.OpenText(fileName);
             var lines = reader.ReadToEnd().Split("\n");
             return lines[1..];
         }
@@ -26,7 +22,7 @@ public class CsvFileReader()
     {
         try
         {
-            using var writer = new StreamWriter(GetFilePath(fileName), true);
+            using var writer = new StreamWriter(fileName, true);
             writer.WriteLine(line);
         }
         catch (Exception e) when (e is IOException or DirectoryNotFoundException)
@@ -39,7 +35,7 @@ public class CsvFileReader()
     {
         try
         {
-            var fileData = File.ReadAllLines(GetFilePath(fileName));
+            var fileData = File.ReadAllLines(fileName);
             for (var i = 0; i < fileData.Length; i++)
             {
                 var lineData = fileData[i].Split(",");
@@ -49,7 +45,7 @@ public class CsvFileReader()
                     break;
                 }
             }
-            File.WriteAllLines(GetFilePath(fileName), fileData);
+            File.WriteAllLines(fileName, fileData);
         }
         catch (Exception e) when (e is IOException or DirectoryNotFoundException)
         {
@@ -61,23 +57,17 @@ public class CsvFileReader()
     {
         try
         {
-            var filePath = GetFilePath(fileName);
-            var fileData = File.ReadAllLines(filePath);
+            var fileData = File.ReadAllLines(fileName);
             fileData = fileData.Where(line =>
             {
                 string[] lineData = line.Split(",");
                 return !lineData[0].Equals(lineKey, StringComparison.OrdinalIgnoreCase);
             }).ToArray();
-            File.WriteAllLines(filePath, fileData);
+            File.WriteAllLines(fileName, fileData);
         }
         catch (Exception e) when (e is IOException or DirectoryNotFoundException)
         {
             Console.WriteLine($"Couldn't delete information: {e.Message}");
         }
-    }
-
-    private string GetFilePath(string filePath)
-    {
-        return Path.Combine(root, filePath);
     }
 }
