@@ -1,13 +1,18 @@
-﻿using AirportBooking.Constants;
-using AirportBooking.Enums;
+﻿using AirportBooking.Enums;
 using AirportBooking.Models;
 using AirportBooking.Validators.CsvValidators;
 
 namespace AirportBooking.Serializers.Csv;
 
-public class FlightCsvSerializer
+public class FlightCsvSerializer : IFlightCsvSerializer
 {
-    private readonly FlightCsvValidator _csvValidator = new();
+    private readonly IFlightCsvValidator _csvValidator;
+
+    public FlightCsvSerializer(IFlightCsvValidator csvValidator)
+    {
+        _csvValidator = csvValidator;
+    }
+
     public Flight FromCsv(string csvLine)
     {
         var data = _csvValidator.Validate(csvLine);
@@ -32,13 +37,14 @@ public class FlightCsvSerializer
 
     private static SortedDictionary<FlightClass, decimal> GetFlightPrices(string[] data)
     {
-        var flightPricesData = data[1..3].ToArray();
+        var flightPricesData = data[1..4].ToArray();
         var flightPrices = new SortedDictionary<FlightClass, decimal>();
         for (var i = 0; i < flightPricesData.Length; i++)
         {
-            if (data[i] is not CsvValueSkipper.ValueSkipper)
+            if (flightPricesData[i] is not "null")
             {
-                flightPrices.Add((FlightClass)i, decimal.Parse(data[i]));
+                //flightPricesData[i] = flightPricesData[i].Replace(".", ",");
+                flightPrices.Add((FlightClass)i, decimal.Parse(flightPricesData[i]));
             }
         }
         return flightPrices;
