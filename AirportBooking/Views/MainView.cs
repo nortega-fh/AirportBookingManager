@@ -32,6 +32,7 @@ public class MainView
             3. Exit
             """);
             string? input = Console.ReadLine();
+            Console.Clear();
             switch (input)
             {
                 case "1":
@@ -48,6 +49,7 @@ public class MainView
             }
             if (_user is not null)
             {
+                Console.Clear();
                 if (_user.Role is UserRole.Manager)
                 {
                     ShowManagerMenu();
@@ -115,6 +117,7 @@ public class MainView
             2. Go back
             """);
             string? answer = Console.ReadLine();
+            Console.Clear();
             switch (answer)
             {
                 case "1":
@@ -241,6 +244,7 @@ public class MainView
             3. First class
             """);
         var typedClass = GetNotEmptyString("flight class");
+        Console.Clear();
         switch (typedClass)
         {
             case "1":
@@ -268,6 +272,7 @@ public class MainView
                 2. Go Back.
                 """);
             string? answer = Console.ReadLine();
+            Console.Clear();
             switch (answer)
             {
                 case "1":

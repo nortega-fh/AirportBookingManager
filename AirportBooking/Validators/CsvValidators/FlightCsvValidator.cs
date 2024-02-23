@@ -4,7 +4,7 @@ using AirportBooking.Models;
 
 namespace AirportBooking.Validators.CsvValidators;
 
-public class FlightCsvValidator : CsvValidatorBase, IFlightCsvValidator
+public class FlightCsvValidator : IFlightCsvValidator
 {
     const int minLineLength = 10;
     public string[] Validate(string csvLine)
@@ -18,22 +18,22 @@ public class FlightCsvValidator : CsvValidatorBase, IFlightCsvValidator
                 {csvLine}
                 """);
         }
-        if (IsStringInvalid(data[0]))
+        if (data[0] is null || data[0].Equals(string.Empty))
         {
             throw new InvalidAttributeException<string>("Flight number", EntityValueRestriction.Restrictions[Restriction.Field]);
         }
         for (int i = 1; i <= 3; i++)
         {
-            if (data[i] is not CsvValueSkipper.ValueSkipper && !decimal.TryParse(data[i].Replace(".", ","), out var _))
+            if (data[i] is not "null" && !decimal.TryParse(data[i].Replace(".", ","), out var _))
             {
                 throw new InvalidAttributeException<decimal>("Flight price", EntityValueRestriction.Restrictions[Restriction.Price]);
             }
         }
-        if (IsStringInvalid(data[4]))
+        if (data[4] is null || data[4].Equals(string.Empty))
         {
             throw new InvalidAttributeException<string>("Origin country", EntityValueRestriction.Restrictions[Restriction.Field]);
         }
-        if (IsStringInvalid(data[5]))
+        if (data[5] is null || data[5].Equals(string.Empty))
         {
             throw new InvalidAttributeException<string>("Destination country", EntityValueRestriction.Restrictions[Restriction.Field]);
         }
@@ -45,11 +45,11 @@ public class FlightCsvValidator : CsvValidatorBase, IFlightCsvValidator
         {
             throw new InvalidAttributeException<DateTime>("Arrival date", EntityValueRestriction.Restrictions[Restriction.Date]);
         }
-        if (IsStringInvalid(data[8]))
+        if (data[8] is null || data[8].Equals(string.Empty))
         {
             throw new InvalidAttributeException<string>("Origin airport", EntityValueRestriction.Restrictions[Restriction.Field]);
         }
-        if (IsStringInvalid(data[9]))
+        if (data[9] is null || data[9].Equals(string.Empty))
         {
             throw new InvalidAttributeException<string>("Destination airport", EntityValueRestriction.Restrictions[Restriction.Field]);
         }

@@ -4,7 +4,7 @@ using AirportBooking.Models;
 
 namespace AirportBooking.Validators.CsvValidators;
 
-public class BookingCsvValidator : CsvValidatorBase
+public class BookingCsvValidator : IBookingCsvValidator
 {
     private const int minLineLength = 8;
     public string[] Validate(string csvLine)
@@ -19,11 +19,11 @@ public class BookingCsvValidator : CsvValidatorBase
         {
             throw new InvalidAttributeException<BookingType>("Booking Type", EntityValueRestriction.Restrictions[Restriction.Field]);
         }
-        if (data[2] is "" or null or CsvValueSkipper.ValueSkipper)
+        if (data[2] is "" or null or "null")
         {
             throw new InvalidAttributeException<string>("First flight number", EntityValueRestriction.Restrictions[Restriction.Field]);
         }
-        if (IsOptionalFieldInvalid(data[3]))
+        if (data[3] is "" || data[3] is not "null")
         {
             throw new InvalidAttributeException<string>("Second flight number", EntityValueRestriction.Restrictions[Restriction.OptionalField]);
         }
@@ -31,11 +31,11 @@ public class BookingCsvValidator : CsvValidatorBase
         {
             throw new InvalidAttributeException<FlightClass>("First flight class", EntityValueRestriction.Restrictions[Restriction.FlightClass]);
         }
-        if (IsOptionalFieldInvalid(data[5]) || !Enum.TryParse<FlightClass>(data[4], true, out var _))
+        if (data[5] is "" || data[5] is not "null" || !Enum.TryParse<FlightClass>(data[4], true, out var _))
         {
             throw new InvalidAttributeException<FlightClass>("Second flight class", EntityValueRestriction.Restrictions[Restriction.OptionalFlightClass]);
         }
-        if (data[6] is CsvValueSkipper.ValueSkipper or "")
+        if (data[6] is "" or "null")
         {
             throw new InvalidAttributeException<string>("Passenger's username", EntityValueRestriction.Restrictions[Restriction.Field]);
         }

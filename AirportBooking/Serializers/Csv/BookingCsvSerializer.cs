@@ -1,5 +1,4 @@
-﻿using AirportBooking.Constants;
-using AirportBooking.Exceptions;
+﻿using AirportBooking.Exceptions;
 using AirportBooking.Models;
 using AirportBooking.Validators.CsvValidators;
 
@@ -13,12 +12,12 @@ public class BookingCsvSerializer
         var data = _validator.Validate(csvLine);
         (var reservationNumber, var bookingType) = (int.Parse(data[0]), Enum.Parse<BookingType>(data[1]));
         var flights = new List<Flight> { new() { Number = data[2] } };
-        if (data[3] is not CsvValueSkipper.ValueSkipper)
+        if (data[3] is not "null")
         {
             flights.Add(new() { Number = data[3] });
         }
         var flightClasses = new List<FlightClass> { Enum.Parse<FlightClass>(data[4]) };
-        if (data[5] is not CsvValueSkipper.ValueSkipper)
+        if (data[5] is not "null")
         {
             flightClasses.Add(Enum.Parse<FlightClass>(data[5]));
         }
