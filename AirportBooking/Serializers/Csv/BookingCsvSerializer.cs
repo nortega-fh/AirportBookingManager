@@ -1,5 +1,4 @@
 ﻿using AirportBooking.Constants;
-using AirportBooking.Enums;
 using AirportBooking.Exceptions;
 using AirportBooking.Models;
 using AirportBooking.Validators.CsvValidators;

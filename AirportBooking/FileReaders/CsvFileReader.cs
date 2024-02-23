@@ -1,6 +1,6 @@
 ﻿namespace AirportBooking.FileReaders;
 
-public class CsvFileReader() : IFileReader
+public class CsvFileReader() : ICsvFileReader
 {
     public string[] Read(string fileName)
     {

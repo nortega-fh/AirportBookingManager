@@ -1,5 +1,4 @@
-﻿using AirportBooking.Enums;
-using AirportBooking.Models;
+﻿using AirportBooking.Models;
 using AirportBooking.Repositories;
 using AirportBooking.Serializers.ConsoleSerializers;
 
@@ -7,12 +6,12 @@ namespace AirportBooking.Views;
 
 public class MainView
 {
-    private readonly IUserRepository _userRepository;
+    private readonly IUserCsvRepository _userRepository;
     private readonly IFlightCsvRepository _flightRepository;
     private readonly IFlightConsoleSerializer _flightConsoleSerializer;
     private User? _user;
 
-    public MainView(IUserRepository userRepository,
+    public MainView(IUserCsvRepository userRepository,
         IFlightCsvRepository flightRepository,
         IFlightConsoleSerializer flightConsoleSerializer)
     {
@@ -193,7 +192,6 @@ public class MainView
         var priceProp = isMin ? "minimum price" : "maximum price";
         Console.WriteLine($"Please type the {priceProp} you want to look for");
         var typedPrice = GetNotEmptyString(priceProp);
-        //typedPrice = typedPrice.Replace(".", ",");
         if (decimal.TryParse(typedPrice, out var price))
         {
             Predicate<Flight> filter = isMin

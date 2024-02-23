@@ -6,11 +6,11 @@ namespace AirportBooking.Repositories;
 
 public class FlightCsvRepository : IFlightCsvRepository
 {
-    private readonly IFileReader _reader;
+    private readonly ICsvFileReader _reader;
     private readonly IFlightCsvSerializer _serializer;
     private readonly static string FlightsFileName = Path.Combine("..", "..", "..", "Data", "flights.csv");
 
-    public FlightCsvRepository(IFileReader reader, IFlightCsvSerializer serializer)
+    public FlightCsvRepository(ICsvFileReader reader, IFlightCsvSerializer serializer)
     {
         _reader = reader;
         _serializer = serializer;

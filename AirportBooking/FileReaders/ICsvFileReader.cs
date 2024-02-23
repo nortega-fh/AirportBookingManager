@@ -1,6 +1,6 @@
 ﻿namespace AirportBooking.FileReaders;
 
-public interface IFileReader
+public interface ICsvFileReader
 {
     string[] Read(string fileName);
     void Write(string fileName, string line);

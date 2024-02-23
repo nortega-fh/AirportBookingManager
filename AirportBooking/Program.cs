@@ -11,7 +11,7 @@ var csvFileReader = new CsvFileReader();
 
 var userValidator = new UserCsvValidator();
 var userSerializer = new UserCsvSerializer(userValidator);
-var userRepository = new UserRepository(csvFileReader, userSerializer);
+var userRepository = new UserCsvRepository(csvFileReader, userSerializer);
 
 var flightValidator = new FlightCsvValidator();
 var flightSerializer = new FlightCsvSerializer(flightValidator);

@@ -1,5 +1,4 @@
-﻿using AirportBooking.Enums;
-using AirportBooking.Models;
+﻿using AirportBooking.Models;
 using AirportBooking.Validators.CsvValidators;
 
 namespace AirportBooking.Serializers.Csv;
@@ -43,7 +42,6 @@ public class FlightCsvSerializer : IFlightCsvSerializer
         {
             if (flightPricesData[i] is not "null")
             {
-                //flightPricesData[i] = flightPricesData[i].Replace(".", ",");
                 flightPrices.Add((FlightClass)i, decimal.Parse(flightPricesData[i]));
             }
         }

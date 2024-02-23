@@ -1,6 +1,4 @@
-﻿using AirportBooking.Enums;
-
-namespace AirportBooking.Models;
+﻿namespace AirportBooking.Models;
 
 public class Flight
 {

@@ -1,5 +1,4 @@
-﻿using AirportBooking.Enums;
-using AirportBooking.Models;
+﻿using AirportBooking.Models;
 using AirportBooking.Validators.CsvValidators;
 
 namespace AirportBooking.Serializers.Csv;

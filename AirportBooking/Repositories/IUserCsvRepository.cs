@@ -2,7 +2,7 @@
 
 namespace AirportBooking.Repositories;
 
-public interface IUserRepository
+public interface IUserCsvRepository
 {
     User? Find(string username);
     User? Find(string username, string password);

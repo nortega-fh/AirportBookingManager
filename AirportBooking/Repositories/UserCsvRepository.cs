@@ -5,13 +5,13 @@ using AirportBooking.Serializers.Csv;
 
 namespace AirportBooking.Repositories;
 
-public class UserRepository : IUserRepository
+public class UserCsvRepository : IUserCsvRepository
 {
-    private readonly IFileReader _reader;
+    private readonly ICsvFileReader _reader;
     private readonly IUserCsvSerializer _serializer;
     private readonly static string UsersFile = Path.Combine("..", "..", "..", "Data", "users.csv");
 
-    public UserRepository(IFileReader reader, IUserCsvSerializer serializer)
+    public UserCsvRepository(ICsvFileReader reader, IUserCsvSerializer serializer)
     {
         _reader = reader;
         _serializer = serializer;
