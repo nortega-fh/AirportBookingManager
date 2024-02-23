@@ -1,4 +1,3 @@
-ReservationNumber,BookingType,FirstFlightNumber,SecondFlightNumber,FirstFlightClass,SecondFlightClass,Passenger,Status
 1,OneWay,A1,null,Business,null,passenger,Confirmed
 2,OneWay,A1,null,Business,null,passenger,Canceled
 3,OneWay,A2,null,Business,null,passenger,Confirmed

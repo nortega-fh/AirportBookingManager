@@ -12,7 +12,11 @@ public class FlightCsvValidator : CsvValidatorBase, IFlightCsvValidator
         var data = csvLine.Split(",");
         if (data.Length < minLineLength)
         {
-            throw new EntityReadingException<Flight>($"The data for the flight is incomplete");
+            throw new EntityReadingException<Flight>($"""
+                The data for the flight is incomplete, there should be at least {minLineLength} fields on each line
+                Error in line
+                {csvLine}
+                """);
         }
         if (IsStringInvalid(data[0]))
         {

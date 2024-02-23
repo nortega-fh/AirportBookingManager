@@ -1,4 +1,5 @@
-﻿using AirportBooking.Models;
+﻿using AirportBooking.Exceptions;
+using AirportBooking.Models;
 using AirportBooking.Repositories;
 using AirportBooking.Serializers.ConsoleSerializers;
 
@@ -259,21 +260,46 @@ public class MainView
 
     private void ShowManagerMenu()
     {
-        Console.WriteLine("""
-            Manager Menu
-            1. Batch Flight Load
-            2. Go Back.
-            """);
-        string? answer = Console.ReadLine();
-        switch (answer)
+        while (true)
         {
-            case "1":
-                break;
-            case "2":
-                break;
-            default:
-                Console.WriteLine("Invalid input, please try again");
-                break;
+            Console.WriteLine("""
+                Manager Menu
+                1. Batch Flight Load
+                2. Go Back.
+                """);
+            string? answer = Console.ReadLine();
+            switch (answer)
+            {
+                case "1":
+                    RequestFlightsFileName();
+                    break;
+                case "2":
+                    return;
+                default:
+                    Console.WriteLine("Invalid input, please try again");
+                    break;
+            }
+        }
+    }
+
+    private void RequestFlightsFileName()
+    {
+        Console.WriteLine("Please type the name of the csv file inside the \"Data\" directory from where you want to load the flights:");
+        string? fileName = Console.ReadLine();
+        if (fileName is null or "")
+        {
+            Console.WriteLine("Invalid input, please try again");
+            return;
+        }
+        try
+        {
+            var path = Path.Combine("..", "..", "..", "Data", fileName.EndsWith(".csv") ? fileName : fileName + ".csv");
+            _flightRepository.AddFileToLoad(path);
+            Console.WriteLine("Flights load succesfully");
+        }
+        catch (SerializationException ex)
+        {
+            Console.WriteLine(ex.Message);
         }
     }
 }

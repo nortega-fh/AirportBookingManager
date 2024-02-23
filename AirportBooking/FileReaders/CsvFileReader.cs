@@ -8,7 +8,7 @@ public class CsvFileReader() : ICsvFileReader
         {
             using var reader = File.OpenText(fileName);
             var lines = reader.ReadToEnd().Split("\n");
-            return lines[1..].Where(line => line is not "").ToArray();
+            return lines.Where(line => line is not "").ToArray();
         }
         catch (Exception e) when (e is IOException or DirectoryNotFoundException)
         {
