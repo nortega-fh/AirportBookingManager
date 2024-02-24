@@ -1,6 +1,4 @@
-﻿
-
-using AirportBooking.FileReaders;
+﻿using AirportBooking.FileReaders;
 using AirportBooking.Repositories;
 using AirportBooking.Serializers.ConsoleSerializers;
 using AirportBooking.Serializers.Csv;

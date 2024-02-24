@@ -1,99 +1,92 @@
-﻿namespace AirportBooking.Repositories;
+﻿using AirportBooking.Exceptions;
+using AirportBooking.FileReaders;
+using AirportBooking.Models;
+using AirportBooking.Serializers.Csv;
 
-public class BookingRepository
+namespace AirportBooking.Repositories;
+
+public class BookingRepository : IBookingRepository
 {
-    //private static int _reservationNumber = 1;
-    //private static readonly string bookingsFilePath = DataDirectory.GetBookingsPath();
-    //private List<Booking> _bookings = [];
-    //private readonly CsvFileReader _reader = new();
-    //private static readonly BookingCsvSerializer _serializer = new();
-    //private readonly IUserRepository _userRepository;
-    //private readonly IFlightRepository _flightRepository;
+    private static int _reservationNumber = 1;
+    private static readonly string BookingsFilePath = Path.Combine("..", "..", "..", "Data", "bookings.csv");
+    private readonly ICsvFileReader _reader;
+    private readonly IBookingCsvSerializer _serializer;
+    private readonly IUserCsvRepository _userRepository;
+    private readonly IFlightCsvRepository _flightRepository;
 
-    //public BookingRepository(IUserRepository userRepository, IFlightRepository flightRepository)
-    //{
-    //    _userRepository = userRepository;
-    //    _flightRepository = flightRepository;
-    //    try
-    //    {
-    //        Load();
-    //    }
-    //    catch (Exception e) when (e is SerializationException)
-    //    {
-    //        _bookings.Clear();
-    //        Console.WriteLine("Couldn't load booking information due to incorrect data:");
-    //        Console.WriteLine(e.Message);
-    //        throw;
-    //    }
-    //}
+    public BookingRepository(
+        ICsvFileReader reader,
+        IBookingCsvSerializer serializer,
+        IUserCsvRepository userRepository,
+        IFlightCsvRepository flightRepository)
+    {
+        _reader = reader;
+        _serializer = serializer;
+        _userRepository = userRepository;
+        _flightRepository = flightRepository;
+    }
 
-    //private void Load()
-    //{
-    //    var storedBookings = _reader.Read(bookingsFilePath).ToList();
-    //    storedBookings.ForEach(line => _bookings.Add(_serializer.FromCsv(line)));
-    //    _bookings = _bookings.Select(booking =>
-    //    {
-    //        booking.Flights = FindBookingFlights(booking);
-    //        booking.MainPassenger = FindBookingMainPassenger(booking);
-    //        return booking;
-    //    }).ToList();
-    //    var lastReadReservationNumber = _bookings.LastOrDefault()?.ReservationNumber ?? 1;
-    //    _reservationNumber = lastReadReservationNumber > 1 ? lastReadReservationNumber + 1 : lastReadReservationNumber;
-    //}
+    public Booking? Find(int rerservationNumber)
+    {
+        var booking = _reader.Read(BookingsFilePath)
+            .Select(_serializer.FromCsv)
+            .Where(booking => booking.ReservationNumber == rerservationNumber)
+            .FirstOrDefault();
+        return booking is not null ? GetBookingInformation(booking) : booking;
+    }
 
-    //private List<Flight> FindBookingFlights(Booking booking)
-    //{
-    //    return booking.Flights.Select(flight => _flightRepository.Find(flight.Number)).ToList();
-    //}
+    public IReadOnlyList<Booking> FindAll()
+    {
+        return _reader.Read(BookingsFilePath)
+            .Select(csvLine => GetBookingInformation(_serializer.FromCsv(csvLine)))
+            .ToList();
+    }
 
-    //private User FindBookingMainPassenger(Booking booking)
-    //{
-    //    return _userRepository.Find(booking.MainPassenger!.Username);
-    //}
+    private Booking GetBookingInformation(Booking booking)
+    {
+        booking.MainPassenger = _userRepository.Find(booking.MainPassenger!.Username)
+            ?? throw new EntityNotFound<User, string>(booking.MainPassenger.Username);
+        booking.Flights = booking.Flights
+            .Select(flight => _flightRepository.Find(flight.Number)
+                ?? throw new EntityNotFound<Flight, string>(flight.Number))
+            .ToList();
+        return booking;
+    }
 
-    //public Booking Find(int rerservationNumber)
-    //{
-    //    return _bookings.Find(b => b.ReservationNumber == rerservationNumber)
-    //        ?? throw new EntityNotFound<Booking, int>(rerservationNumber);
-    //}
+    public IReadOnlyList<Booking> Filter(params Predicate<Booking>[] filters)
+    {
+        var bookingList = FindAll();
+        foreach (var filter in filters)
+        {
+            bookingList = bookingList.Where(filter.Invoke).ToList();
+        }
+        return bookingList;
+    }
 
-    //public IReadOnlyList<Booking> FindAll()
-    //{
-    //    return _bookings;
-    //}
+    public Booking Save(Booking booking)
+    {
+        booking.ReservationNumber = _reservationNumber;
+        _reservationNumber++;
+        _reader.Write(BookingsFilePath, _serializer.ToCsv(booking));
+        return booking;
+    }
 
-    //public IReadOnlyList<Booking> Filter(BookingParameters filters)
-    //{
-    //    return [];
-    //}
+    public Booking Update(int reservationNumber, Booking booking)
+    {
+        if (Find(reservationNumber) is null)
+        {
+            throw new EntityNotFound<Booking, int>(reservationNumber);
+        }
+        _reader.UpdateLine(BookingsFilePath, reservationNumber.ToString(), _serializer.ToCsv(booking));
+        return booking;
+    }
 
-    //public Booking Save(Booking booking)
-    //{
-    //    booking.ReservationNumber = _reservationNumber;
-    //    _reservationNumber++;
-    //    _reader.Write(bookingsFilePath, _serializer.ToCsv(booking));
-    //    _bookings.Add(booking);
-    //    return booking;
-    //}
-
-    //public Booking Update(int reservationNumber, Booking booking)
-    //{
-    //    if (_bookings.Find(b => b.ReservationNumber == reservationNumber) is null)
-    //    {
-    //        throw new EntityNotFound<Booking, int>(reservationNumber);
-    //    }
-    //    _reader.UpdateLine(bookingsFilePath, reservationNumber.ToString(), _serializer.ToCsv(booking));
-    //    _bookings = _bookings.Select(b => b.ReservationNumber == reservationNumber ? booking : b).ToList();
-    //    return booking;
-    //}
-
-    //public void Delete(int reservationNumber)
-    //{
-    //    if (_bookings.Find(b => b.ReservationNumber == reservationNumber) == null)
-    //    {
-    //        throw new EntityNotFound<Booking, int>(reservationNumber);
-    //    }
-    //    _reader.DeleteLine(bookingsFilePath, reservationNumber.ToString());
-    //    _bookings = _bookings.Where(b => b.ReservationNumber != reservationNumber).ToList();
-    //}
+    public void Delete(int reservationNumber)
+    {
+        if (Find(reservationNumber) is null)
+        {
+            throw new EntityNotFound<Booking, int>(reservationNumber);
+        }
+        _reader.DeleteLine(BookingsFilePath, reservationNumber.ToString());
+    }
 }

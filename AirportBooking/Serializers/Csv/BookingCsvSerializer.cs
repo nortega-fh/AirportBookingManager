@@ -4,9 +4,14 @@ using AirportBooking.Validators.CsvValidators;
 
 namespace AirportBooking.Serializers.Csv;
 
-public class BookingCsvSerializer
+public class BookingCsvSerializer : IBookingCsvSerializer
 {
-    private readonly BookingCsvValidator _validator = new();
+    private readonly IBookingCsvValidator _validator;
+
+    public BookingCsvSerializer(IBookingCsvValidator validator)
+    {
+        _validator = validator;
+    }
     public Booking FromCsv(string csvLine)
     {
         var data = _validator.Validate(csvLine);
