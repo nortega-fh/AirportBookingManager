@@ -1,6 +1,6 @@
 ﻿using AirportBooking.Exceptions;
 using AirportBooking.Models;
-using AirportBooking.Validators.CsvValidators;
+using AirportBooking.Validators;
 
 namespace AirportBooking.Serializers.Csv;
 

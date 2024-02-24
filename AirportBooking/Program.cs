@@ -2,7 +2,7 @@
 using AirportBooking.Repositories;
 using AirportBooking.Serializers.ConsoleSerializers;
 using AirportBooking.Serializers.Csv;
-using AirportBooking.Validators.CsvValidators;
+using AirportBooking.Validators;
 using AirportBooking.Views;
 
 var csvFileReader = new CsvFileReader();

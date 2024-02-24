@@ -248,13 +248,13 @@ public class MainView
         switch (typedClass)
         {
             case "1":
-                filters.Add((flight) => flight.ClassPrices.Keys.Contains(FlightClass.Economy));
+                filters.Add((flight) => flight.ClassPrices.ContainsKey(FlightClass.Economy));
                 break;
             case "2":
-                filters.Add((flight) => flight.ClassPrices.Keys.Contains(FlightClass.Business));
+                filters.Add((flight) => flight.ClassPrices.ContainsKey(FlightClass.Business));
                 break;
             case "3":
-                filters.Add((flight) => flight.ClassPrices.Keys.Contains(FlightClass.FirstClass));
+                filters.Add((flight) => flight.ClassPrices.ContainsKey(FlightClass.FirstClass));
                 break;
             default:
                 Console.WriteLine("Could not recognize selected class. Please try again");

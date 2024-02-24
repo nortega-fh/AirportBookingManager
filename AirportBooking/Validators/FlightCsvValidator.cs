@@ -2,7 +2,7 @@
 using AirportBooking.Exceptions;
 using AirportBooking.Models;
 
-namespace AirportBooking.Validators.CsvValidators;
+namespace AirportBooking.Validators;
 
 public class FlightCsvValidator : IFlightCsvValidator
 {

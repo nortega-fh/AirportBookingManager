@@ -1,4 +1,4 @@
-﻿namespace AirportBooking.Validators.CsvValidators
+﻿namespace AirportBooking.Validators
 {
     public interface IBookingCsvValidator
     {
