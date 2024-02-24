@@ -15,6 +15,11 @@ var flightValidator = new FlightCsvValidator();
 var flightSerializer = new FlightCsvSerializer(flightValidator);
 var flightConsoleSerializer = new FlightConsoleSerializer();
 var flightRepository = new FlightCsvRepository(csvFileReader, flightSerializer);
+var flightController = new FlightConsoleController(flightRepository, flightConsoleSerializer);
 
-var mainView = new MainView(userRepository, flightRepository, flightConsoleSerializer);
+var userSession = new UserSession();
+var passengerMenu = new PassengerMenu(userSession, flightController);
+var managerMenu = new ManagerMenu(userSession, flightController);
+
+var mainView = new LoginView(userRepository, userSession, managerMenu, passengerMenu);
 mainView.Run();

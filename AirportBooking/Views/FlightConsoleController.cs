@@ -5,134 +5,17 @@ using AirportBooking.Serializers.ConsoleSerializers;
 
 namespace AirportBooking.Views;
 
-public class MainView
+public class FlightConsoleController : IFlightConsoleController
 {
-    private readonly IUserCsvRepository _userRepository;
     private readonly IFlightCsvRepository _flightRepository;
     private readonly IFlightConsoleSerializer _flightConsoleSerializer;
-    private User? _user;
-
-    public MainView(IUserCsvRepository userRepository,
-        IFlightCsvRepository flightRepository,
-        IFlightConsoleSerializer flightConsoleSerializer)
+    public FlightConsoleController(IFlightCsvRepository repository, IFlightConsoleSerializer consoleSerializer)
     {
-        _userRepository = userRepository;
-        _flightRepository = flightRepository;
-        _flightConsoleSerializer = flightConsoleSerializer;
+        _flightRepository = repository;
+        _flightConsoleSerializer = consoleSerializer;
     }
 
-    public void Run()
-    {
-        while (true)
-        {
-            Console.WriteLine("""
-            Aiport Booking Manager. Type the number of the option:
-            1. Login
-            2. Register
-            3. Exit
-            """);
-            string? input = Console.ReadLine();
-            Console.Clear();
-            switch (input)
-            {
-                case "1":
-                    Login();
-                    break;
-                case "2":
-                    Register();
-                    break;
-                case "3":
-                    return;
-                default:
-                    Console.WriteLine("Invalid input, please try again");
-                    break;
-            }
-            if (_user is not null)
-            {
-                Console.Clear();
-                if (_user.Role is UserRole.Manager)
-                {
-                    ShowManagerMenu();
-                }
-                else
-                {
-                    ShowPassengerMenu();
-                }
-            }
-        }
-    }
-
-    private void Login()
-    {
-        Console.WriteLine("Please type your username");
-        string username = Console.ReadLine() ?? "";
-        Console.WriteLine("Please type your password");
-        string password = Console.ReadLine() ?? "";
-        var user = _userRepository.Find(username, password);
-        if (user is null)
-        {
-            Console.WriteLine("Login failed. Username or password incorrect");
-            return;
-        }
-        Console.WriteLine("Login successful");
-        _user = user;
-    }
-
-    private void Register()
-    {
-        var username = GetNotEmptyString("username");
-        var password = GetNotEmptyString("password");
-
-        try
-        {
-            _user = _userRepository.Create(new User { Username = username, Password = password, Role = UserRole.Passenger });
-            Console.WriteLine("User registered succesfully");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Error registering user:");
-            Console.WriteLine(ex.Message);
-        }
-    }
-
-    private string GetNotEmptyString(string property)
-    {
-        var input = "";
-        while (input is "")
-        {
-            Console.WriteLine($"Please type your {property}");
-            input = Console.ReadLine() ?? "";
-            if (input is "") Console.WriteLine($"You have to type a valid {property}");
-        }
-        return input;
-    }
-
-    private void ShowPassengerMenu()
-    {
-        while (true)
-        {
-            Console.WriteLine("""
-            Passenger Menu
-            1. Search flights
-            2. Go back
-            """);
-            string? answer = Console.ReadLine();
-            Console.Clear();
-            switch (answer)
-            {
-                case "1":
-                    SearchFlights();
-                    break;
-                case "2":
-                    return;
-                default:
-                    Console.WriteLine("Invalid input, please try again");
-                    break;
-            }
-        }
-    }
-
-    private void SearchFlights()
+    public void SearchFlights()
     {
         var filters = new List<Predicate<Flight>>();
         bool isApplyingFilters = true;
@@ -182,7 +65,8 @@ public class MainView
                     GetFlightClassFilter(filters);
                     break;
                 case "9":
-                    _flightRepository.Filter([.. filters]).ToList().ForEach(_flightConsoleSerializer.PrintToConsole);
+                    _flightRepository.Filter([.. filters]).ToList().ForEach(_flightConsoleSerializer.PrintToConsoleWithPrices);
+                    filters.Clear();
                     break;
                 case "10":
                     isApplyingFilters = false;
@@ -262,32 +146,7 @@ public class MainView
         }
     }
 
-    private void ShowManagerMenu()
-    {
-        while (true)
-        {
-            Console.WriteLine("""
-                Manager Menu
-                1. Batch Flight Load
-                2. Go Back.
-                """);
-            string? answer = Console.ReadLine();
-            Console.Clear();
-            switch (answer)
-            {
-                case "1":
-                    RequestFlightsFileName();
-                    break;
-                case "2":
-                    return;
-                default:
-                    Console.WriteLine("Invalid input, please try again");
-                    break;
-            }
-        }
-    }
-
-    private void RequestFlightsFileName()
+    public void RequestFlightsFileName()
     {
         Console.WriteLine("Please type the name of the csv file inside the \"Data\" directory from where you want to load the flights:");
         string? fileName = Console.ReadLine();
@@ -306,5 +165,17 @@ public class MainView
         {
             Console.WriteLine(ex.Message);
         }
+    }
+
+    private string GetNotEmptyString(string property)
+    {
+        var input = "";
+        while (input is "")
+        {
+            Console.WriteLine($"Please type your {property}");
+            input = Console.ReadLine() ?? "";
+            if (input is "") Console.WriteLine($"You have to type a valid {property}");
+        }
+        return input;
     }
 }

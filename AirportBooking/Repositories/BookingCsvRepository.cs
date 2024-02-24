@@ -5,7 +5,7 @@ using AirportBooking.Serializers.Csv;
 
 namespace AirportBooking.Repositories;
 
-public class BookingRepository : IBookingRepository
+public class BookingCsvRepository : IBookingCsvRepository
 {
     private static int _reservationNumber = 1;
     private static readonly string BookingsFilePath = Path.Combine("..", "..", "..", "Data", "bookings.csv");
@@ -14,7 +14,7 @@ public class BookingRepository : IBookingRepository
     private readonly IUserCsvRepository _userRepository;
     private readonly IFlightCsvRepository _flightRepository;
 
-    public BookingRepository(
+    public BookingCsvRepository(
         ICsvFileReader reader,
         IBookingCsvSerializer serializer,
         IUserCsvRepository userRepository,
