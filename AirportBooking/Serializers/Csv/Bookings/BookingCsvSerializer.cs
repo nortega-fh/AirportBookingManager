@@ -1,6 +1,7 @@
 ﻿using AirportBooking.Exceptions;
 using AirportBooking.Models.Bookings;
 using AirportBooking.Models.Flights;
+using AirportBooking.Models.Users;
 using AirportBooking.Validators.Bookings;
 
 namespace AirportBooking.Serializers.Csv.Bookings;

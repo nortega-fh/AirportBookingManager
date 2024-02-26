@@ -9,7 +9,7 @@ public class BookingConsoleSerializer : IBookingConsoleSerializer
         var isNewBooking = booking.ReservationNumber == 0;
         if (isNewBooking)
         {
-            Console.WriteLine($"""
+            System.Console.WriteLine($"""
                 ######################################
                     Booking {booking.BookingType}
                 --------------------------------------
@@ -22,7 +22,7 @@ public class BookingConsoleSerializer : IBookingConsoleSerializer
                 """);
             return;
         }
-        Console.WriteLine($""""
+        System.Console.WriteLine($""""
             ######################################
               Reservation number: {booking.ReservationNumber}
             ######################################
@@ -52,7 +52,7 @@ public class BookingConsoleSerializer : IBookingConsoleSerializer
         var namesList = Enum.GetNames<T>();
         for (var i = 0; i < namesList.Length; ++i)
         {
-            Console.WriteLine($"{i + 1}. {namesList[i]}");
+            System.Console.WriteLine($"{i + 1}. {namesList[i]}");
         }
     }
 }

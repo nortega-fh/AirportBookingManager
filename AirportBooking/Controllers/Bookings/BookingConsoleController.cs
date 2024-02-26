@@ -42,8 +42,8 @@ public class BookingConsoleController : IBookingConsoleController
         {
             Console.WriteLine("""
             Search Bookings
-            Add the filters by which you want to look the booking by typing the number of one of the options below
-            Once you are done or if you want to look all available, type the option 11 to see the result list.
+            Here you can add a filter with each of the options available, once you have included all the desired filters you
+            can type "11" to make the search. Filters will be applied in the order you added them.
             1. Search for Minimum price.
             2. Search for Maximum price.
             3. Search for Flight Number.
@@ -70,36 +70,23 @@ public class BookingConsoleController : IBookingConsoleController
                     searchParams.Add(booking => booking.Flights.Any(flight => flight.Number == flightNumber));
                     break;
                 case "4":
-                    searchParams.Add(GetFlightValueEqualsFilter(
-                        "Please type the departure country to look for",
-                        booking => booking.Flights.First(),
-                        flight => flight.OriginCountry));
+                    searchParams.Add(GetFlightValueContainsFilter("Please type the departure country to look for", booking => booking.Flights.First(), flight => flight.OriginCountry));
                     break;
                 case "5":
-                    searchParams.Add(GetFlightValueEqualsFilter(
-                        "Please type the destination country to look for",
-                        booking => booking.Flights.Last(),
-                        flight => flight.DestinationCountry));
+                    searchParams.Add(GetFlightValueContainsFilter("Please type the destination country to look for", booking => booking.Flights.Last(), flight => flight.DestinationCountry));
                     break;
                 case "6":
                     searchParams.Add(GetBookingDepartureDateFilter());
                     break;
                 case "7":
-                    searchParams.Add(GetFlightValueContainsFilter(
-                        "Please type the departure airport to look for",
-                        booking => booking.Flights.First(),
-                        flight => flight.OriginAirport));
+                    searchParams.Add(GetFlightValueContainsFilter("Please type the departure airport to look for", booking => booking.Flights.First(), flight => flight.OriginAirport));
                     break;
                 case "8":
-                    searchParams.Add(GetFlightValueContainsFilter(
-                        "Please type the arrival airport to look for",
-                        booking => booking.Flights.Last(),
-                        flight => flight.DestinationAirport));
+                    searchParams.Add(GetFlightValueContainsFilter("Please type the arrival airport to look for", booking => booking.Flights.Last(), flight => flight.DestinationAirport));
                     break;
                 case "9":
                     var username = _consoleInputHandler.GetNotEmptyString("Please type the user's username to look for");
-                    searchParams.Add(booking => booking.MainPassenger is not null
-                        && booking.MainPassenger.Username.Contains(username, StringComparison.OrdinalIgnoreCase));
+                    searchParams.Add(booking => booking.MainPassenger is not null && booking.MainPassenger.Username.Contains(username, StringComparison.OrdinalIgnoreCase));
                     break;
                 case "10":
                     searchParams.Add(GetFlightClassFilter());
@@ -128,21 +115,15 @@ public class BookingConsoleController : IBookingConsoleController
         }
         if (isMin)
         {
-            return (booking) => booking.CalculatePrice() >= price;
+            return booking => booking.CalculatePrice() >= price;
         }
-        return (booking) => booking.CalculatePrice() <= price;
-    }
-
-    private Predicate<Booking> GetFlightValueEqualsFilter(string message, Func<Booking, Flight> bookingFlight, Func<Flight, string> flightValue)
-    {
-        var value = _consoleInputHandler.GetNotEmptyString(message);
-        return (booking) => flightValue.Invoke(bookingFlight.Invoke(booking)).Equals(value, StringComparison.OrdinalIgnoreCase);
+        return booking => booking.CalculatePrice() <= price;
     }
 
     private Predicate<Booking> GetFlightValueContainsFilter(string message, Func<Booking, Flight> bookingFlight, Func<Flight, string> flightValue)
     {
         var value = _consoleInputHandler.GetNotEmptyString(message);
-        return (booking) => flightValue.Invoke(bookingFlight.Invoke(booking)).Contains(value, StringComparison.OrdinalIgnoreCase);
+        return booking => flightValue.Invoke(bookingFlight.Invoke(booking)).Contains(value, StringComparison.OrdinalIgnoreCase);
     }
 
     private Predicate<Booking> GetBookingDepartureDateFilter()
@@ -159,8 +140,7 @@ public class BookingConsoleController : IBookingConsoleController
             Console.WriteLine("Could not read date, please try again.");
             isDateValid = DateTime.TryParse(departureDate, out date);
         }
-        return booking => booking.Flights.First().DepartureDate >= date.AddDays(-1)
-            && booking.Flights.First().DepartureDate <= date.AddDays(1);
+        return booking => booking.Flights.First().DepartureDate >= date.AddDays(-1) && booking.Flights.First().DepartureDate <= date.AddDays(1);
     }
 
     private Predicate<Booking> GetFlightClassFilter()

@@ -6,7 +6,7 @@ public class FlightConsoleSerializer : IFlightConsoleSerializer
 {
     public void PrintToConsole(Flight entity)
     {
-        Console.WriteLine($"""
+        System.Console.WriteLine($"""
             -------------------------------------------------------------
                        Flight Number: {entity.Number} 
             -------------------------------------------------------------
@@ -20,7 +20,7 @@ public class FlightConsoleSerializer : IFlightConsoleSerializer
 
     public void PrintToConsoleWithPrices(Flight flight)
     {
-        Console.WriteLine($"""
+        System.Console.WriteLine($"""
             -------------------------------------------------------------
                     Flight Number: {flight.Number} 
             -------------------------------------------------------------
@@ -40,7 +40,7 @@ public class FlightConsoleSerializer : IFlightConsoleSerializer
         for (var i = 1; i < flight.ClassPrices.Count + 1; i++)
         {
             var classPrice = flight.ClassPrices.ElementAt(i - 1);
-            Console.WriteLine($"{i}. {classPrice.Key} : {string.Format("{0:C}", classPrice.Value)}");
+            System.Console.WriteLine($"{i}. {classPrice.Key} : {string.Format("{0:C}", classPrice.Value)}");
         }
     }
 

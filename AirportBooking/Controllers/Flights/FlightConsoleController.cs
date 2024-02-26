@@ -88,36 +88,27 @@ public class FlightConsoleController : IFlightConsoleController
     {
         var priceProp = isMin ? "minimum price" : "maximum price";
         Console.WriteLine($"Please type the {priceProp} you want to look for");
-        var typedPrice = _consoleInputHandler.GetNotEmptyString(priceProp);
-        if (decimal.TryParse(typedPrice, out var price))
-        {
-            Predicate<Flight> filter = isMin
-                ? (Flight flight) => flight.ClassPrices.Values.Min() >= price
-                : (Flight flight) => flight.ClassPrices.Values.Max() <= price;
-            filters.Add(filter);
-        }
-        else
-        {
-            Console.WriteLine("Could not process the number typed, please try again");
-        }
+        var price = _consoleInputHandler.GetDecimal();
+        Predicate<Flight> filter = isMin
+            ? (Flight flight) => flight.ClassPrices.Values.Min() >= price
+            : (Flight flight) => flight.ClassPrices.Values.Max() <= price;
+        filters.Add(filter);
     }
 
     private void GetStringFilter(List<Predicate<Flight>> filters, string filterName, Func<Flight, string> flightProp)
     {
-        Console.WriteLine($"Please type the {filterName} that you want to look for");
-        var parameter = _consoleInputHandler.GetNotEmptyString(filterName);
+        var parameter = _consoleInputHandler.GetNotEmptyString($"Please type the {filterName} that you want to look for");
         filters.Add((flight) => flightProp.Invoke(flight).Equals(parameter, StringComparison.OrdinalIgnoreCase));
     }
 
     private void GetDepartureDateFilter(List<Predicate<Flight>> filters)
     {
-        Console.WriteLine("""
+        var typedDate = _consoleInputHandler.GetNotEmptyString("""
             Please type the departure date of the flight, should be in YYYY-MM-DD format where:
             Y - Year number
             M - Month number
             D - Day of the month number
             """);
-        var typedDate = _consoleInputHandler.GetNotEmptyString("departure date");
         if (DateTime.TryParse(typedDate, out var date))
         {
             filters.Add((flight) => flight.DepartureDate >= date.AddDays(-1) && flight.DepartureDate <= date.AddDays(1));
@@ -130,13 +121,12 @@ public class FlightConsoleController : IFlightConsoleController
 
     private void GetFlightClassFilter(List<Predicate<Flight>> filters)
     {
-        Console.WriteLine("""
+        var typedClass = _consoleInputHandler.GetNotEmptyString("""
             Please select one class to look for the flight:
             1. Economy
             2. Business
             3. First class
             """);
-        var typedClass = _consoleInputHandler.GetNotEmptyString("flight class");
         Console.Clear();
         switch (typedClass)
         {
@@ -157,13 +147,7 @@ public class FlightConsoleController : IFlightConsoleController
 
     public void RequestFlightsFileName()
     {
-        Console.WriteLine("Please type the name of the csv file inside the \"Data\" directory from where you want to load the flights:");
-        string? fileName = Console.ReadLine();
-        if (fileName is null or "")
-        {
-            Console.WriteLine("Invalid input, please try again");
-            return;
-        }
+        var fileName = _consoleInputHandler.GetNotEmptyString("Please type the name of the csv file inside the \"Data\" directory from where you want to load the flights:");
         try
         {
             var path = Path.Combine("..", "..", "..", "Data", fileName.EndsWith(".csv") ? fileName : fileName + ".csv");

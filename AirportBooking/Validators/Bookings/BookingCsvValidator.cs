@@ -24,7 +24,7 @@ public class BookingCsvValidator : IBookingCsvValidator
         {
             throw new InvalidAttributeException<string>("First flight number", EntityValueRestriction.Restrictions[Restriction.Field]);
         }
-        if (data[3] is "" || data[3] is not "null")
+        if (data[3] is "")
         {
             throw new InvalidAttributeException<string>("Second flight number", EntityValueRestriction.Restrictions[Restriction.OptionalField]);
         }
@@ -32,11 +32,11 @@ public class BookingCsvValidator : IBookingCsvValidator
         {
             throw new InvalidAttributeException<FlightClass>("First flight class", EntityValueRestriction.Restrictions[Restriction.FlightClass]);
         }
-        if (data[5] is "" || data[5] is not "null" || !Enum.TryParse<FlightClass>(data[4], true, out var _))
+        if (!Enum.TryParse<FlightClass>(data[4], true, out var _))
         {
             throw new InvalidAttributeException<FlightClass>("Second flight class", EntityValueRestriction.Restrictions[Restriction.OptionalFlightClass]);
         }
-        if (data[6] is "" or "null")
+        if (data[6] is "")
         {
             throw new InvalidAttributeException<string>("Passenger's username", EntityValueRestriction.Restrictions[Restriction.Field]);
         }
