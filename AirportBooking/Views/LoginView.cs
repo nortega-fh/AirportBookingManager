@@ -1,5 +1,9 @@
-﻿using AirportBooking.Models;
-using AirportBooking.Repositories;
+﻿using AirportBooking.ConsoleInputHandler;
+using AirportBooking.Models.Users;
+using AirportBooking.Repositories.Users;
+using AirportBooking.Views.Context;
+using AirportBooking.Views.Menus.Manager;
+using AirportBooking.Views.Menus.Passenger;
 
 namespace AirportBooking.Views;
 
@@ -9,16 +13,20 @@ public class LoginView
     private readonly IUserSession _userSession;
     private readonly IManagerMenu _managerMenu;
     private readonly IPassengerMenu _passengerMenu;
+    private readonly IConsoleInputHandler _consoleInputHandler;
 
-    public LoginView(IUserCsvRepository userRepository,
+    public LoginView(
+        IUserCsvRepository userRepository,
         IUserSession userSession,
         IManagerMenu managerMenu,
-        IPassengerMenu passengerMenu)
+        IPassengerMenu passengerMenu,
+        IConsoleInputHandler consoleInputHandler)
     {
         _userRepository = userRepository;
         _managerMenu = managerMenu;
         _passengerMenu = passengerMenu;
         _userSession = userSession;
+        _consoleInputHandler = consoleInputHandler;
     }
 
     public void Run()
@@ -80,8 +88,8 @@ public class LoginView
 
     private void Register()
     {
-        var username = GetNotEmptyString("username");
-        var password = GetNotEmptyString("password");
+        var username = _consoleInputHandler.GetNotEmptyString("username");
+        var password = _consoleInputHandler.GetNotEmptyString("password");
         try
         {
             _userSession.SetUser(_userRepository.Create(
@@ -99,17 +107,4 @@ public class LoginView
             Console.WriteLine(ex.Message);
         }
     }
-
-    private string GetNotEmptyString(string property)
-    {
-        var input = "";
-        while (input is "")
-        {
-            Console.WriteLine($"Please type your {property}");
-            input = Console.ReadLine() ?? "";
-            if (input is "") Console.WriteLine($"You have to type a valid {property}");
-        }
-        return input;
-    }
-
 }
