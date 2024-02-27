@@ -29,10 +29,7 @@ public class BookingConsoleController : IBookingConsoleController
 
     public void ShowUserBookings(User user)
     {
-        _repository
-            .Filter((booking) => booking.MainPassenger?.Username == user.Username)
-            .ToList()
-            .ForEach(_serializer.PrintToConsole);
+        _repository.Filter(booking => booking.MainPassenger?.Username == user.Username).ToList().ForEach(_serializer.PrintToConsole);
     }
 
     public void SearchBookings()
@@ -104,15 +101,10 @@ public class BookingConsoleController : IBookingConsoleController
         }
     }
 
-    private static Predicate<Booking> GetPriceFilter(bool isMin = true)
+    private Predicate<Booking> GetPriceFilter(bool isMin = true)
     {
         Console.WriteLine("Please type the price to filter for the booking");
-        var obtainedPrice = decimal.TryParse(Console.ReadLine(), out var price);
-        while (!obtainedPrice)
-        {
-            Console.WriteLine("Invalid input, could not read number for the price. Please try again");
-            obtainedPrice = decimal.TryParse(Console.ReadLine(), out price);
-        }
+        var price = _consoleInputHandler.GetDecimal();
         if (isMin)
         {
             return booking => booking.CalculatePrice() >= price;
@@ -163,12 +155,10 @@ public class BookingConsoleController : IBookingConsoleController
 
     public void CancelBooking()
     {
-        Console.WriteLine("Please type the booking reservation number to delete.");
-        var reservationNumber = _consoleInputHandler.GetInteger();
-        var booking = _repository.Find(reservationNumber);
-        if (booking is null)
+        var booking = GetBooking();
+        if (booking.Status == BookingStatus.Canceled)
         {
-            Console.WriteLine($"No booking with reservation number \"{reservationNumber}\" found");
+            Console.WriteLine($"Booking with reservation number \"{booking.ReservationNumber}\" is already canceled");
             return;
         }
         Console.WriteLine("Are you sure you want to cancel the following booking?");
@@ -181,7 +171,7 @@ public class BookingConsoleController : IBookingConsoleController
         {
             case "1":
                 booking.Status = BookingStatus.Canceled;
-                _repository.Update(reservationNumber, booking);
+                _repository.Update(booking.ReservationNumber, booking);
                 Console.WriteLine("Booking succesfully canceled");
                 break;
             case "2":
@@ -190,6 +180,20 @@ public class BookingConsoleController : IBookingConsoleController
                 Console.WriteLine("Option invalid. Please try again");
                 break;
         }
+    }
+
+    private Booking GetBooking()
+    {
+        Console.WriteLine("Please type the reservation number of the booking:");
+        var reservationNumber = _consoleInputHandler.GetInteger();
+        var booking = _repository.Find(reservationNumber);
+        while (booking is null)
+        {
+            Console.WriteLine($"The booking with reservation number {reservationNumber} doesn't exists");
+            reservationNumber = _consoleInputHandler.GetInteger();
+            booking = _repository.Find(reservationNumber);
+        }
+        return booking;
     }
 
     public void CreateBooking(User user)
@@ -216,49 +220,9 @@ public class BookingConsoleController : IBookingConsoleController
         }
     }
 
-    public void UpdateBooking(User user)
-    {
-        ShowUserBookings(user);
-        Console.WriteLine("Please type the reservation number of the booking to modify:");
-        var reservationNumber = _consoleInputHandler.GetInteger();
-        var booking = _repository.Find(reservationNumber);
-        if (booking is null)
-        {
-            Console.WriteLine($"The booking with reservation number {reservationNumber} doesn't exists");
-            return;
-        }
-        _serializer.PrintToConsole(booking);
-        Console.WriteLine("""
-            Select the changes you want to make to the booking:
-            1. Change flight
-            2. Change type
-            3. Change class
-            4. Change status
-            """);
-        switch (Console.ReadLine())
-        {
-            case "1":
-                SetBookingFlights(booking);
-                break;
-            case "2":
-                SetBookingType(booking);
-                break;
-            case "3":
-                SetBookingClasses(booking);
-                break;
-            case "4":
-                SetBookingStatus(booking);
-                break;
-            default:
-                Console.WriteLine("Option not valid. Please try again");
-                break;
-        }
-        Console.Clear();
-    }
-
     private void SetBookingType(Booking booking)
     {
-        Console.WriteLine("Please choose the new type of the booking");
+        Console.WriteLine("Please choose the type of the booking");
         _serializer.ShowBookingTypes();
         var bookingTypeList = Enum.GetNames<BookingType>();
         var option = _consoleInputHandler.GetInteger();
@@ -267,22 +231,8 @@ public class BookingConsoleController : IBookingConsoleController
             Console.WriteLine("Invald option, please try again");
             return;
         }
-        booking.BookingType = Enum.Parse<BookingType>(bookingTypeList[option]);
-    }
-
-    private void SetBookingStatus(Booking booking)
-    {
-        Console.WriteLine("Please choose the new status of the booking");
-        var bookingStatusList = Enum.GetNames<BookingStatus>();
-        _serializer.ShowBookingStatuses();
-        var option = _consoleInputHandler.GetInteger();
-        if (option < 0 || option > bookingStatusList.Length)
-        {
-            Console.WriteLine("Invald option, please try again");
-            return;
-        }
-        booking.Status = Enum.Parse<BookingStatus>(bookingStatusList[option]);
-        Console.Clear();
+        var chosenType = Enum.Parse<BookingType>(bookingTypeList[option - 1]);
+        booking.BookingType = chosenType;
     }
 
     private void SetBookingFlights(Booking booking)
@@ -291,48 +241,56 @@ public class BookingConsoleController : IBookingConsoleController
         var bookingModifiedFlights = new List<Flight>();
         for (var i = 0; i < numberOfFlightsToAdd; i++)
         {
-            bookingModifiedFlights.Add(GetFlight());
+            bookingModifiedFlights.Add(_flightController.GetFlightToBook());
+        }
+        if (bookingModifiedFlights.First().DepartureDate > bookingModifiedFlights.Last().DepartureDate)
+        {
+            Console.WriteLine("Error: last flight's departure date can't be before than first flight's departure date");
+            return;
         }
         booking.Flights = bookingModifiedFlights;
         SetBookingClasses(booking);
     }
 
-    private Flight GetFlight()
-    {
-        var searchedFlights = _flightController.SearchFlights();
-        var flightNumber = _consoleInputHandler.GetNotEmptyString("flight number");
-        var flight = searchedFlights
-            .Where(flight => flight.Number.Equals(flightNumber))
-            .FirstOrDefault();
-        while (flight is null)
-        {
-            Console.WriteLine($"Flight with {flightNumber} doesn't match the parameters of search or doesn't exist. Please try again");
-            flightNumber = _consoleInputHandler.GetNotEmptyString("flight number");
-            flight = searchedFlights
-            .Where(flight => flight.Number.Equals(flightNumber))
-            .FirstOrDefault();
-        }
-        return flight;
-    }
-
     private void SetBookingClasses(Booking booking)
     {
         var modifiedClasses = new List<FlightClass>();
-        booking.Flights.ForEach(flight => modifiedClasses.Add(GetClassForFlight(flight)));
+        booking.Flights.ForEach(flight => modifiedClasses.Add(_flightController.GetClassForFlight(flight)));
         booking.FlightClasses = modifiedClasses;
         Console.Clear();
     }
 
-    private FlightClass GetClassForFlight(Flight flight)
+    public void UpdateBooking(User user)
     {
-        Console.WriteLine($"Please select the new class for the flight {flight.Number}:");
-        _flightController.ShowFlightClasses(flight);
-        var option = _consoleInputHandler.GetInteger();
-        while (option < 1 || option > flight.ClassPrices.Count)
+        ShowUserBookings(user);
+        var booking = GetBooking();
+        _serializer.PrintToConsole(booking);
+        var isEditing = true;
+        while (isEditing)
         {
-            Console.WriteLine($"Option provided \"{option}\" is not within the options range. Please try again.");
-            option = _consoleInputHandler.GetInteger();
+            Console.WriteLine("""
+            Select the changes you want to make to the booking:
+            1. Change flights
+            2. Change class
+            3. Confirm
+            """);
+            switch (Console.ReadLine())
+            {
+                case "1":
+                    SetBookingFlights(booking);
+                    break;
+                case "2":
+                    SetBookingClasses(booking);
+                    break;
+                case "3":
+                    isEditing = false;
+                    break;
+                default:
+                    Console.WriteLine("Option not valid. Please try again");
+                    break;
+            }
         }
-        return flight.ClassPrices.Keys.ElementAt(option - 1);
+        Console.Clear();
+        _repository.Update(booking.ReservationNumber, booking);
     }
 }

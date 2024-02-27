@@ -1,5 +1,6 @@
 ﻿using AirportBooking.ConsoleInputHandler;
 using AirportBooking.Exceptions;
+using AirportBooking.Models.Bookings;
 using AirportBooking.Models.Flights;
 using AirportBooking.Repositories.Flights;
 using AirportBooking.Serializers.Console.Flights;
@@ -22,9 +23,112 @@ public class FlightConsoleController : IFlightConsoleController
         _consoleInputHandler = consoleInputHandler;
     }
 
+    public IReadOnlyList<Flight> SearchFlightsToBook(BookingType bookingType)
+    {
+        var flights = new List<Flight>();
+        var totalFlightsToBook = bookingType == BookingType.OneWay ? 1 : 2;
+        for (var i = 0; i < totalFlightsToBook; i++)
+        {
+            flights.Add(GetFlightToBook());
+        }
+        return flights;
+    }
+
+    public Flight GetFlightToBook()
+    {
+        var filters = new List<Predicate<Flight>>();
+        GetStringFilter(filters, "departure country", flight => flight.OriginCountry);
+        GetStringFilter(filters, "arrival country", flight => flight.DestinationCountry);
+        GetDepartureDateFilter(filters);
+        Console.WriteLine("""
+            Do you want to add more filters to your search?
+            1. Yes
+            2. No
+            """);
+        Console.Clear();
+        var selectedFlight = new Flight();
+        switch (Console.ReadLine())
+        {
+            case "1":
+                AddOptionalParams(filters);
+                goto case "2";
+            case "2":
+                selectedFlight = SelectFlightFromList(GetFlightsWithParams([.. filters]));
+                filters.Clear();
+                break;
+            default:
+                Console.WriteLine("Invalid option. Please try again.");
+                break;
+        }
+        return selectedFlight;
+    }
+
+    private void AddOptionalParams(IList<Predicate<Flight>> filters)
+    {
+        while (true)
+        {
+            Console.WriteLine("""
+            Add additional filters for the flight:
+            1. Select minimum price.
+            2. Select maximum price.
+            3. Select departure airport.
+            4. Select arrival airport.
+            5. Select flight class.
+            6. Apply filters
+            """);
+            switch (Console.ReadLine())
+            {
+                case "1":
+                    GetPriceFilter(filters, true);
+                    break;
+                case "2":
+                    GetPriceFilter(filters, false);
+                    break;
+                case "3":
+                    GetStringFilter(filters, "departure airport", flight => flight.OriginAirport);
+                    break;
+                case "4":
+                    GetStringFilter(filters, "arrival airport", flight => flight.DestinationAirport);
+                    break;
+                case "5":
+                    GetFlightClassFilter(filters);
+                    break;
+                case "6":
+                    return;
+                default:
+                    Console.WriteLine("Invalid input, please try again");
+                    break;
+            }
+        }
+    }
+
+    private IEnumerable<Flight> GetFlightsWithParams(params Predicate<Flight>[] filters)
+    {
+        return _flightRepository.Filter(filters);
+    }
+
+    private Flight SelectFlightFromList(IEnumerable<Flight> flights)
+    {
+        PrintFlightList(flights);
+        var flightNumber = _consoleInputHandler.GetNotEmptyString("Please type the flight number that you want to select");
+        var selectedFlight = flights.Where(f => f.Number.Equals(flightNumber)).FirstOrDefault();
+        while (selectedFlight is null)
+        {
+            Console.WriteLine($"The flight with flight number {flightNumber} is not in the previous list. Please try again");
+            selectedFlight = flights.Where(f => f.Number.Equals(flightNumber)).FirstOrDefault();
+        }
+        return selectedFlight;
+    }
+
+    private void PrintFlightList(IEnumerable<Flight> flights)
+    {
+        flights.ToList().ForEach(_flightConsoleSerializer.PrintToConsoleWithPrices);
+    }
+
     public IReadOnlyList<Flight> SearchFlights()
     {
         var filters = new List<Predicate<Flight>>();
+        var flights = new List<Flight>();
         bool isApplyingFilters = true;
         while (isApplyingFilters)
         {
@@ -72,19 +176,19 @@ public class FlightConsoleController : IFlightConsoleController
                     GetFlightClassFilter(filters);
                     break;
                 case "9":
-                    var flights = _flightRepository.Filter([.. filters]).ToList();
-                    flights.ForEach(_flightConsoleSerializer.PrintToConsoleWithPrices);
+                    flights = GetFlightsWithParams([.. filters]).ToList();
+                    PrintFlightList(flights);
                     filters.Clear();
-                    return flights;
+                    break;
                 case "10":
                     isApplyingFilters = false;
                     break;
             }
         }
-        return [];
+        return flights;
     }
 
-    private void GetPriceFilter(List<Predicate<Flight>> filters, bool isMin)
+    private void GetPriceFilter(IList<Predicate<Flight>> filters, bool isMin)
     {
         var priceProp = isMin ? "minimum price" : "maximum price";
         Console.WriteLine($"Please type the {priceProp} you want to look for");
@@ -95,13 +199,13 @@ public class FlightConsoleController : IFlightConsoleController
         filters.Add(filter);
     }
 
-    private void GetStringFilter(List<Predicate<Flight>> filters, string filterName, Func<Flight, string> flightProp)
+    private void GetStringFilter(IList<Predicate<Flight>> filters, string filterName, Func<Flight, string> flightProp)
     {
         var parameter = _consoleInputHandler.GetNotEmptyString($"Please type the {filterName} that you want to look for");
-        filters.Add((flight) => flightProp.Invoke(flight).Equals(parameter, StringComparison.OrdinalIgnoreCase));
+        filters.Add((flight) => flightProp.Invoke(flight).Contains(parameter, StringComparison.OrdinalIgnoreCase));
     }
 
-    private void GetDepartureDateFilter(List<Predicate<Flight>> filters)
+    private void GetDepartureDateFilter(IList<Predicate<Flight>> filters)
     {
         var typedDate = _consoleInputHandler.GetNotEmptyString("""
             Please type the departure date of the flight, should be in YYYY-MM-DD format where:
@@ -119,7 +223,7 @@ public class FlightConsoleController : IFlightConsoleController
         }
     }
 
-    private void GetFlightClassFilter(List<Predicate<Flight>> filters)
+    private void GetFlightClassFilter(IList<Predicate<Flight>> filters)
     {
         var typedClass = _consoleInputHandler.GetNotEmptyString("""
             Please select one class to look for the flight:
@@ -163,5 +267,18 @@ public class FlightConsoleController : IFlightConsoleController
     public void ShowFlightClasses(Flight flight)
     {
         _flightConsoleSerializer.ShowFlightAvailableClasses(flight);
+    }
+
+    public FlightClass GetClassForFlight(Flight flight)
+    {
+        Console.WriteLine($"Please select the new class for the flight {flight.Number}:");
+        ShowFlightClasses(flight);
+        var option = _consoleInputHandler.GetInteger();
+        while (option < 1 || option > flight.ClassPrices.Count)
+        {
+            Console.WriteLine($"Option provided \"{option}\" is not within the options range. Please try again.");
+            option = _consoleInputHandler.GetInteger();
+        }
+        return flight.ClassPrices.Keys.ElementAt(option - 1);
     }
 }
