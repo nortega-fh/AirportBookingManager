@@ -1,9 +1,8 @@
 ﻿using AirportBooking.Models.Flights;
 
-namespace AirportBooking.Serializers.Csv.Flights
+namespace AirportBooking.Serializers.Csv.Flights;
+
+public interface IFlightCsvSerializer
 {
-    public interface IFlightCsvSerializer
-    {
-        Flight FromCsv(string csvLine);
-    }
+    Flight FromCsv(string csvLine);
 }

@@ -41,7 +41,7 @@ public class CsvFileReader() : ICsvFileReader
                 var lineData = fileData[i].Split(",");
                 if (lineData[0].Equals(key, StringComparison.OrdinalIgnoreCase))
                 {
-                    lineData[i] = data;
+                    fileData[i] = data;
                     break;
                 }
             }

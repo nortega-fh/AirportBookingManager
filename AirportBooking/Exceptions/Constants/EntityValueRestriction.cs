@@ -1,4 +1,4 @@
-﻿namespace AirportBooking.Constants;
+﻿namespace AirportBooking.Exceptions.Constants;
 
 public enum Restriction
 {

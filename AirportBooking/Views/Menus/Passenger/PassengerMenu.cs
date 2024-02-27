@@ -100,7 +100,7 @@ public class PassengerMenu : IPassengerMenu
                 Booking manager
                 1. Show my bookings
                 2. Edit booking
-                3. Delete booking
+                3. Cancel booking
                 4. Go back
                 """);
             switch (Console.ReadLine())
@@ -120,6 +120,7 @@ public class PassengerMenu : IPassengerMenu
                     Console.WriteLine("Invalid input, please try again");
                     break;
             }
+            Console.Clear();
         }
     }
 }

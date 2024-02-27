@@ -2,6 +2,5 @@
 
 public interface IPassengerMenu
 {
-
     void ShowPassengerMenu();
 }

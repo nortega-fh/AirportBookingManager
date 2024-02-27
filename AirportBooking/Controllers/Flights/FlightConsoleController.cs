@@ -36,16 +36,17 @@ public class FlightConsoleController : IFlightConsoleController
 
     public Flight GetFlightToBook()
     {
-        var filters = new List<Predicate<Flight>>();
-        GetStringFilter(filters, "departure country", flight => flight.OriginCountry);
-        GetStringFilter(filters, "arrival country", flight => flight.DestinationCountry);
-        GetDepartureDateFilter(filters);
+        var filters = new List<Predicate<Flight>>
+        {
+            GetStringFilter("departure country", flight => flight.OriginCountry),
+            GetStringFilter("arrival country", flight => flight.DestinationCountry),
+            GetDepartureDateFilter()
+        };
         Console.WriteLine("""
             Do you want to add more filters to your search?
             1. Yes
             2. No
             """);
-        Console.Clear();
         var selectedFlight = new Flight();
         switch (Console.ReadLine())
         {
@@ -60,6 +61,7 @@ public class FlightConsoleController : IFlightConsoleController
                 Console.WriteLine("Invalid option. Please try again.");
                 break;
         }
+        Console.Clear();
         return selectedFlight;
     }
 
@@ -79,19 +81,19 @@ public class FlightConsoleController : IFlightConsoleController
             switch (Console.ReadLine())
             {
                 case "1":
-                    GetPriceFilter(filters, true);
+                    filters.Add(GetPriceFilter(true));
                     break;
                 case "2":
-                    GetPriceFilter(filters, false);
+                    filters.Add(GetPriceFilter(false));
                     break;
                 case "3":
-                    GetStringFilter(filters, "departure airport", flight => flight.OriginAirport);
+                    filters.Add(GetStringFilter("departure airport", flight => flight.OriginAirport));
                     break;
                 case "4":
-                    GetStringFilter(filters, "arrival airport", flight => flight.DestinationAirport);
+                    filters.Add(GetStringFilter("arrival airport", flight => flight.DestinationAirport));
                     break;
                 case "5":
-                    GetFlightClassFilter(filters);
+                    filters.Add(GetFlightClassFilter());
                     break;
                 case "6":
                     return;
@@ -152,28 +154,28 @@ public class FlightConsoleController : IFlightConsoleController
             switch (option)
             {
                 case "1":
-                    GetPriceFilter(filters, true);
+                    filters.Add(GetPriceFilter(true));
                     break;
                 case "2":
-                    GetPriceFilter(filters, false);
+                    filters.Add(GetPriceFilter(false));
                     break;
                 case "3":
-                    GetStringFilter(filters, "departure country", (flight) => flight.OriginCountry);
+                    filters.Add(GetStringFilter("departure country", (flight) => flight.OriginCountry));
                     break;
                 case "4":
-                    GetStringFilter(filters, "destination country", (flight) => flight.DestinationCountry);
+                    filters.Add(GetStringFilter("destination country", (flight) => flight.DestinationCountry));
                     break;
                 case "5":
-                    GetDepartureDateFilter(filters);
+                    filters.Add(GetDepartureDateFilter());
                     break;
                 case "6":
-                    GetStringFilter(filters, "departure airport", (flight) => flight.OriginAirport);
+                    filters.Add(GetStringFilter("departure airport", (flight) => flight.OriginAirport));
                     break;
                 case "7":
-                    GetStringFilter(filters, "arrival airport", (flight) => flight.DestinationAirport);
+                    filters.Add(GetStringFilter("arrival airport", (flight) => flight.DestinationAirport));
                     break;
                 case "8":
-                    GetFlightClassFilter(filters);
+                    filters.Add(GetFlightClassFilter());
                     break;
                 case "9":
                     flights = GetFlightsWithParams([.. filters]).ToList();
@@ -188,24 +190,21 @@ public class FlightConsoleController : IFlightConsoleController
         return flights;
     }
 
-    private void GetPriceFilter(IList<Predicate<Flight>> filters, bool isMin)
+    private Predicate<Flight> GetPriceFilter(bool isMin)
     {
         var priceProp = isMin ? "minimum price" : "maximum price";
         Console.WriteLine($"Please type the {priceProp} you want to look for");
         var price = _consoleInputHandler.GetDecimal();
-        Predicate<Flight> filter = isMin
-            ? (Flight flight) => flight.ClassPrices.Values.Min() >= price
-            : (Flight flight) => flight.ClassPrices.Values.Max() <= price;
-        filters.Add(filter);
+        return isMin ? flight => flight.ClassPrices.Values.Min() >= price : flight => flight.ClassPrices.Values.Max() <= price;
     }
 
-    private void GetStringFilter(IList<Predicate<Flight>> filters, string filterName, Func<Flight, string> flightProp)
+    private Predicate<Flight> GetStringFilter(string filterName, Func<Flight, string> flightProp)
     {
         var parameter = _consoleInputHandler.GetNotEmptyString($"Please type the {filterName} that you want to look for");
-        filters.Add((flight) => flightProp.Invoke(flight).Contains(parameter, StringComparison.OrdinalIgnoreCase));
+        return flight => flightProp.Invoke(flight).Contains(parameter, StringComparison.OrdinalIgnoreCase);
     }
 
-    private void GetDepartureDateFilter(IList<Predicate<Flight>> filters)
+    private Predicate<Flight> GetDepartureDateFilter()
     {
         var typedDate = _consoleInputHandler.GetNotEmptyString("""
             Please type the departure date of the flight, should be in YYYY-MM-DD format where:
@@ -213,39 +212,38 @@ public class FlightConsoleController : IFlightConsoleController
             M - Month number
             D - Day of the month number
             """);
-        if (DateTime.TryParse(typedDate, out var date))
-        {
-            filters.Add((flight) => flight.DepartureDate >= date.AddDays(-1) && flight.DepartureDate <= date.AddDays(1));
-        }
-        else
+        var isDateValid = DateTime.TryParse(typedDate, out var date);
+        while (!isDateValid)
         {
             Console.WriteLine("Could not process the date typed, please try again");
+            isDateValid = DateTime.TryParse(Console.ReadLine(), out date);
         }
+        return flight => flight.DepartureDate >= date.AddDays(-1) && flight.DepartureDate <= date.AddDays(1);
     }
 
-    private void GetFlightClassFilter(IList<Predicate<Flight>> filters)
+    public Predicate<Flight> GetFlightClassFilter()
     {
-        var typedClass = _consoleInputHandler.GetNotEmptyString("""
-            Please select one class to look for the flight:
-            1. Economy
-            2. Business
-            3. First class
-            """);
-        Console.Clear();
-        switch (typedClass)
+        while (true)
         {
-            case "1":
-                filters.Add((flight) => flight.ClassPrices.ContainsKey(FlightClass.Economy));
-                break;
-            case "2":
-                filters.Add((flight) => flight.ClassPrices.ContainsKey(FlightClass.Business));
-                break;
-            case "3":
-                filters.Add((flight) => flight.ClassPrices.ContainsKey(FlightClass.FirstClass));
-                break;
-            default:
-                Console.WriteLine("Could not recognize selected class. Please try again");
-                break;
+            var typedClass = _consoleInputHandler.GetNotEmptyString("""
+                Please select one class to look for the flight:
+                1. Economy
+                2. Business
+                3. First class
+                """);
+            Console.Clear();
+            switch (typedClass)
+            {
+                case "1":
+                    return flight => flight.ClassPrices.ContainsKey(FlightClass.Economy);
+                case "2":
+                    return flight => flight.ClassPrices.ContainsKey(FlightClass.Business);
+                case "3":
+                    return flight => flight.ClassPrices.ContainsKey(FlightClass.FirstClass);
+                default:
+                    Console.WriteLine("Could not recognize selected class. Please try again");
+                    break;
+            }
         }
     }
 
@@ -271,6 +269,7 @@ public class FlightConsoleController : IFlightConsoleController
 
     public FlightClass GetClassForFlight(Flight flight)
     {
+        _flightConsoleSerializer.PrintToConsole(flight);
         Console.WriteLine($"Please select the new class for the flight {flight.Number}:");
         ShowFlightClasses(flight);
         var option = _consoleInputHandler.GetInteger();

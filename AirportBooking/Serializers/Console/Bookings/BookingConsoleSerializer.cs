@@ -39,17 +39,7 @@ public class BookingConsoleSerializer : IBookingConsoleSerializer
 
     public void ShowBookingTypes()
     {
-        ShowEnumList<BookingType>();
-    }
-
-    public void ShowBookingStatuses()
-    {
-        ShowEnumList<BookingStatus>();
-    }
-
-    private static void ShowEnumList<T>() where T : struct, Enum
-    {
-        var namesList = Enum.GetNames<T>();
+        var namesList = Enum.GetNames<BookingType>();
         for (var i = 0; i < namesList.Length; ++i)
         {
             System.Console.WriteLine($"{i + 1}. {namesList[i]}");

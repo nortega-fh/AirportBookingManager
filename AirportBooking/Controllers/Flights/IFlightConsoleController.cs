@@ -9,4 +9,5 @@ public interface IFlightConsoleController
     IReadOnlyList<Flight> SearchFlights();
     void ShowFlightClasses(Flight flight);
     FlightClass GetClassForFlight(Flight flight);
+    Predicate<Flight> GetFlightClassFilter();
 }

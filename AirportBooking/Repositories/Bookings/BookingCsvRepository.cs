@@ -84,13 +84,4 @@ public class BookingCsvRepository : IBookingCsvRepository
         _reader.UpdateLine(BookingsFilePath, reservationNumber.ToString(), _serializer.ToCsv(booking));
         return booking;
     }
-
-    public void Delete(int reservationNumber)
-    {
-        if (Find(reservationNumber) is null)
-        {
-            throw new EntityNotFound<Booking, int>(reservationNumber);
-        }
-        _reader.DeleteLine(BookingsFilePath, reservationNumber.ToString());
-    }
 }

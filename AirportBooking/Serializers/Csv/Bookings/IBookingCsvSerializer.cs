@@ -1,10 +1,9 @@
 ﻿using AirportBooking.Models.Bookings;
 
-namespace AirportBooking.Serializers.Csv.Bookings
+namespace AirportBooking.Serializers.Csv.Bookings;
+
+public interface IBookingCsvSerializer
 {
-    public interface IBookingCsvSerializer
-    {
-        Booking FromCsv(string csvLine);
-        string ToCsv(Booking booking);
-    }
+    Booking FromCsv(string csvLine);
+    string ToCsv(Booking booking);
 }

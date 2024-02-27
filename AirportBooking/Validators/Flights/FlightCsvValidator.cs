@@ -1,5 +1,5 @@
-﻿using AirportBooking.Constants;
-using AirportBooking.Exceptions;
+﻿using AirportBooking.Exceptions;
+using AirportBooking.Exceptions.Constants;
 using AirportBooking.Models.Flights;
 
 namespace AirportBooking.Validators.Flights;

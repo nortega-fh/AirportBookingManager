@@ -1,5 +1,5 @@
-﻿using AirportBooking.Constants;
-using AirportBooking.Exceptions;
+﻿using AirportBooking.Exceptions;
+using AirportBooking.Exceptions.Constants;
 using AirportBooking.Models.Users;
 
 namespace AirportBooking.Validators.Users;
@@ -25,7 +25,7 @@ public class UserCsvValidator : IUserCsvValidator
         return data;
     }
 
-    private bool IsUsernameOrPasswordInvalid(string[] data)
+    private static bool IsUsernameOrPasswordInvalid(string[] data)
     {
         return data[0] is null
             || data[0] is "null"

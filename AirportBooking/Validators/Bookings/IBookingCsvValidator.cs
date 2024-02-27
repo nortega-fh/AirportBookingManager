@@ -1,7 +1,6 @@
-﻿namespace AirportBooking.Validators.Bookings
+﻿namespace AirportBooking.Validators.Bookings;
+
+public interface IBookingCsvValidator
 {
-    public interface IBookingCsvValidator
-    {
-        string[] Validate(string csvLine);
-    }
+    string[] Validate(string csvLine);
 }

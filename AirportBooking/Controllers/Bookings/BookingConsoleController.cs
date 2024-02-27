@@ -137,20 +137,8 @@ public class BookingConsoleController : IBookingConsoleController
 
     private Predicate<Booking> GetFlightClassFilter()
     {
-        Console.WriteLine("Please choose a flight class to look for");
-        var flightClasses = Enum.GetNames<FlightClass>();
-        for (var i = 0; i < flightClasses.Length; i++)
-        {
-            Console.WriteLine($"{i + 1}. {flightClasses[i]}");
-        }
-        var option = _consoleInputHandler.GetInteger();
-        while (option < 1 || option > flightClasses.Length)
-        {
-            Console.WriteLine("Option is not within the valid range. Please try again");
-            option = _consoleInputHandler.GetInteger();
-        }
-        var classSelected = Enum.Parse<FlightClass>(flightClasses[option - 1]);
-        return booking => booking.FlightClasses.Contains(classSelected);
+        var classFilter = _flightController.GetFlightClassFilter();
+        return booking => booking.Flights.Find(flight => classFilter.Invoke(flight)) is not null;
     }
 
     public void CancelBooking()

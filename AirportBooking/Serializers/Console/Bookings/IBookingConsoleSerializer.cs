@@ -6,5 +6,4 @@ public interface IBookingConsoleSerializer
 {
     void PrintToConsole(Booking booking);
     void ShowBookingTypes();
-    void ShowBookingStatuses();
 }
