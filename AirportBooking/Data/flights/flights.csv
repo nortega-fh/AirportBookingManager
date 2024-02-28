@@ -1,5 +1,0 @@
-Number,PriceEconomy,PriceBusiness,PriceFirstClass,OriginCountry,DestinationCountry,DepartureDate,ArrivalDate,OriginAirport,DestinationAirport
-A1,Economy:120,Business:130,FirstClass:140,Colombia,United States of America (USA),2024-03-15T05:12:00Z,2024-03-16T12:12:00Z,BOG,MIA
-A2,Economy:120,Business:130,FirstClass:140,United States of America (USA), Colombia,2024-03-20T05:12:00Z,2024-03-21T12:12:00Z,MIA,BOG
-A3,Business:1260.84,Colombia,France,2024-02-10T11:30:00Z,2024-02-11T03:30:00Z,BOG,CDG
-A4,Business:1260.84,France,Colombia,2024-02-15T16:30:00Z,2024-02-16T07:30:00Z,CDG,BOG

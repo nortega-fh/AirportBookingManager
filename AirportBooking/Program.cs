@@ -1,31 +1,45 @@
-﻿using AirportBooking.Filters;
-using AirportBooking.Repositories.CsvRepositories;
-using AirportBooking.Serializers.ConsoleSerializers;
-using AirportBooking.Serializers.CSVSerializers;
-using AirportBooking.Validators.EntityValidators;
+﻿using AirportBooking.ConsoleInputHandler;
+using AirportBooking.Controllers.Bookings;
+using AirportBooking.Controllers.Flights;
+using AirportBooking.FileReaders;
+using AirportBooking.Repositories.Bookings;
+using AirportBooking.Repositories.Flights;
+using AirportBooking.Repositories.Users;
+using AirportBooking.Serializers.Console.Bookings;
+using AirportBooking.Serializers.Console.Flights;
+using AirportBooking.Serializers.Csv.Bookings;
+using AirportBooking.Serializers.Csv.Flights;
+using AirportBooking.Serializers.Csv.Users;
+using AirportBooking.Validators.Bookings;
+using AirportBooking.Validators.Flights;
+using AirportBooking.Validators.Users;
 using AirportBooking.Views;
-using AirportBooking.Views.Controllers;
+using AirportBooking.Views.Context;
+using AirportBooking.Views.Menus.Manager;
+using AirportBooking.Views.Menus.Passenger;
 
-var userValidator = new UserValidator();
-var userCsvSerializer = new UserCsvSerializer(userValidator);
+var csvFileReader = new CsvFileReader();
+var consoleInputHandler = new ConsoleInputHandler();
 
-var userRepository = new UserRepository(userCsvSerializer, userValidator);
-var flightRepository = new FlightRepository();
-var bookingRepository = new BookingRepository(userRepository, flightRepository);
+var userValidator = new UserCsvValidator();
+var userSerializer = new UserCsvSerializer(userValidator);
+var userRepository = new UserCsvRepository(csvFileReader, userSerializer);
 
-var userConsoleSerializer = new UserConsoleSerializer();
+var flightValidator = new FlightCsvValidator();
+var flightSerializer = new FlightCsvSerializer(flightValidator);
 var flightConsoleSerializer = new FlightConsoleSerializer();
+var flightRepository = new FlightCsvRepository(csvFileReader, flightSerializer);
+var flightController = new FlightConsoleController(flightRepository, flightConsoleSerializer, consoleInputHandler);
+
+var bookingCsvValidator = new BookingCsvValidator();
+var bookingCsvSerializer = new BookingCsvSerializer(bookingCsvValidator);
 var bookingConsoleSerializer = new BookingConsoleSerializer();
+var bookingRepository = new BookingCsvRepository(csvFileReader, bookingCsvSerializer, userRepository, flightRepository);
+var bookingConsoleController = new BookingConsoleController(consoleInputHandler, bookingRepository, bookingConsoleSerializer, flightController);
 
-var flightsFilter = new FlightFilter();
-var bookingsFilter = new BookingFilter(flightsFilter, flightRepository);
+var userSession = new UserSession();
+var passengerMenu = new PassengerMenu(userSession, flightController, bookingConsoleController);
+var managerMenu = new ManagerMenu(userSession, flightController, bookingConsoleController);
 
-var flightController = new FlightsController(flightRepository, flightConsoleSerializer, flightsFilter);
-var userController = new UserController(userRepository, userConsoleSerializer);
-var bookingController = new BookingsController(bookingRepository, bookingConsoleSerializer, bookingsFilter);
-
-var passengerView = new PassengerView(flightController, bookingController);
-var managerView = new ManagerView();
-
-MainView userInterface = new(userController, passengerView, managerView);
-userInterface.Show();
+var mainView = new LoginView(userRepository, userSession, managerMenu, passengerMenu, consoleInputHandler);
+mainView.Run();
