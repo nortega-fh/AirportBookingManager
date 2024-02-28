@@ -120,7 +120,6 @@ public class PassengerMenu : IPassengerMenu
                     Console.WriteLine("Invalid input, please try again");
                     break;
             }
-            Console.Clear();
         }
     }
 }
