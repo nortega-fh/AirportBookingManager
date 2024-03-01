@@ -4,7 +4,7 @@ using AirportBooking.Models.Flights;
 using AirportBooking.Validators.Bookings;
 using FluentAssertions;
 
-namespace AiportBooking.Tests.Validators.Bookings;
+namespace AiportBooking.Tests.Validators;
 
 public class BookingsCsvValidatorShould
 {
