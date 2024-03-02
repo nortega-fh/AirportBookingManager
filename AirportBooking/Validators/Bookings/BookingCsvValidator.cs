@@ -32,11 +32,12 @@ public class BookingCsvValidator : IBookingCsvValidator
         {
             throw new InvalidAttributeException<FlightClass>("First flight class", EntityValueRestriction.Restrictions[Restriction.FlightClass]);
         }
-        if (!Enum.TryParse<FlightClass>(data[4], true, out var _))
+        if ((data[3] is not "null" && data[5] is "" or "null")
+            || (data[5] is not "null" && !Enum.TryParse<FlightClass>(data[5], true, out var _)))
         {
             throw new InvalidAttributeException<FlightClass>("Second flight class", EntityValueRestriction.Restrictions[Restriction.OptionalFlightClass]);
         }
-        if (data[6] is "")
+        if (data[6] is "" or "null")
         {
             throw new InvalidAttributeException<string>("Passenger's username", EntityValueRestriction.Restrictions[Restriction.Field]);
         }

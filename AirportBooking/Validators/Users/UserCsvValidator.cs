@@ -31,7 +31,7 @@ public class UserCsvValidator : IUserCsvValidator
             || data[0] is "null"
             || data[0].Equals(string.Empty)
             || data[1] is null
-            || data[0] is "null"
+            || data[1] is "null"
             || data[1].Equals(string.Empty);
     }
 }
